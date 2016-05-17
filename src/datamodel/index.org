@@ -145,6 +145,9 @@ These specifications also capture referential integrity.
 #+END_SRC
 
 * Operations 
+
+
+
 CRUD operations.  
 
 Each operation is performed on an entity instance or an
@@ -155,7 +158,37 @@ actor performing the operation.
  - C  create a user      
  - R  read from a user   
  - U  update a user      
- - D  delete a user      
+ - D  delete a user
+
+| Operation                     | Credentials         | Referential     | Effect and/or             | Remarks               |
+| Signature                     |                     | Integrity       | Output                    |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| login(u:user)                 |                     | u : user set    | returns a session         | creates a new session |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| getName(u:user,s:session)     |                     | u : user set    | return name of a user     |                       |
+|                               |                     | s : session set |                           |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| updateName(u:user,s:session)  | s.user.role = admin | u : user set    |                           |                       |
+|                               | or                  | s :session set  | change the name           |                       |
+|                               | s.user = u          |                 |                           |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| getEmail(u:user,s:session)    |                     | u : user set    | return Email of a user    |                       |
+|                               |                     | s : session set |                           |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| updateEmail(u:user,s:session) | s.user.role = admin | u : user set    |                           |                       |
+|                               | or                  | s : session set | change the Email          |                       |
+|                               | s.user = u          |                 |                           |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| getNameFromEmail(u:user       |                     | u : user set    | returns the name if Email |                       |
+| s:session)                    |                     | s : session set | exists                    |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| getRole(u:user,s:session)     |                     | u : user set    | return role of a user     |                       |
+|                               |                     | s : session set |                           |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| updateRole(u:user,s:session)  | s.user.role = admin | u : user set    | change the role of a user |                       |
+|                               | u.role != admin     | s : session set | to admin                  |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+|                               |                     |                 |                           |                       |
 
 ** Actor
 Operations are performed by Actors.  Our application has two
