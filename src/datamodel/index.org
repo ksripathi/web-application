@@ -7,6 +7,7 @@
 #+options: ^:nil
 #+LATEX: Literal LaTeX code for export
 * Notation
+
 ** Sets, cardinality and relations
 
 If =A= is a set, then
@@ -74,6 +75,7 @@ Encodes the following items of information:
 
 
 * Abstract Entity Types
+
 #+BEGIN_SRC spec :tangle spec.txt
 User
 #+END_SRC
@@ -148,6 +150,7 @@ These specifications also capture referential integrity.
 
 
 
+
 CRUD operations.  
 
 Each operation is performed on an entity instance or an
@@ -188,7 +191,12 @@ actor performing the operation.
 | updateRole(u:user,s:session)  | s.user.role = admin | u : user set    | change the role of a user |                       |
 |                               | u.role != admin     | s : session set | to admin                  |                       |
 |-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
-|                               |                     |                 |                           |                       |
+| createUser(u:user,s:session)  | s.user.role = admin | u : user set    | creates a new user        |                       |
+|                               |                     | s : session set |                           |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
+| deleteUser(u:user,s:session)  | s.user.role = admin | u : user set    | deletes a user only if he |                       |
+|                               | u.role != admin     | s : session set | is not an admin.          |                       |
+|-------------------------------+---------------------+-----------------+---------------------------+-----------------------|
 
 ** Actor
 Operations are performed by Actors.  Our application has two
