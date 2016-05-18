@@ -1,0 +1,57 @@
+#+TITLE:  Building a web application: Ground up to the Cloud
+#+AUTHOR:  Shashank Viswanadha
+#+DATE:  [2016-05-17 Tue]
+
+* Objective
+
+
+The objective of this exercise is to build a full web application from scratch.
+ 
+* Steps involved
+
+[[./intro.jpg]]
+
+
+** Understanding the requirements
+
+The requirements of the application are to be clearly understood before we
+actually begin the process of building the application.
+
+** Building a model
+
+After the requirements are understood we need to build a mathematical model of
+the data that we are going to need for the application.  We understood how
+cardinality can be used to model a real life scenario. We learnt to model
+relations between the different entities of a system.  Also learnt about the
+states of the system and how they can be changed to realise the system.
+
+** Code
+
+Once the mathematical model is built, we convert this model into code using
+object oriented programming.
+
+* List of technologies  
+
+- [[https://www.python.org][Python]] :: python version 2.7
+
+- [[https://www.flask.pocoo.org][Flask]]  :: Flask is a framework for web development in python.
+
+- [[https://www.javascript.com][Javascript]]  :: JS for front end.
+
+
+
+
+* Operations
+
+
+
+  
+
+| Operation                  | Credentials | Referential | Effect and /or | Remarks |
+| Signature                  |             | Integrity   | Output         |         |
+|----------------------------+-------------+-------------+----------------+---------|
+| login (u:user)             |             |             |                |         |
+|                            |             |             |                |         |
+|                            |             |             |                |         |
+|                            |             |             |                |         |
+
