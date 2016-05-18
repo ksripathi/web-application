@@ -57,9 +57,8 @@ print "tests package"
 
 
 
-* Object Model
-
-** Custom Exceptions
+* Object Model*
+* Custom Exceptions
    These are some of the custom exceptions used in the application.
 
 *** AttributeRequired
@@ -128,6 +127,10 @@ class Name(object):
 
     def __str__(self):
         return self.value
+        
+    def to_client(self):
+        return self.value
+
 #+END_SRC
 
 
@@ -156,9 +159,16 @@ class TestName(TestCase):
 class Email(object):
     value = None
     def __init__(self, value):
-        print "fill"
+        if is_email(value):
+            self.value = value
+        else:
+            raise TypeError('%s is not a valid Email!' %value)
+            
     def __str__(self):
-        print "fill"
+        return self.value
+        
+    def to_client(self):
+        return self.value
         
 #+END_SRC
 
@@ -168,6 +178,11 @@ class TestEmail(TestCase):
     TESTING = True
     def test_email_type(self):
         print "test_email_type"
+        new_email = Email("John@gmail.com")
+        # correct email
+        self.assertEqual(new_email.value, "John@gmail.com")
+        # incorrect email
+        self.assertRaises(TypeError,Email,"John")
 #+END_SRC
 
 ** User
@@ -185,6 +200,9 @@ class TestEmail(TestCase):
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
 class User():
     users = []     # this is a static variable, accessed by User.users
+    name = None
+    email = None
+    role = None
 #+END_SRC
 
 
@@ -201,7 +219,14 @@ class User():
 
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def __init__(self, **kwargs):
-        print "fill"
+        for key,value in kwargs.iteritems():
+            if key == 'name' :
+                self.set_name(value)
+            elif key == 'email' :
+                self.set_email(value)
+            elif key == 'role' :
+                self.set_role(value)
+        User.users.append(self)
 #+END_SRC
 
 
@@ -210,11 +235,15 @@ class User():
 class TestUser(TestCase):
     TESTING = True
 
-    def test_user_creation_without_role(self):
-        print "test_user_creation_without_role"
-
-    def test_user_creation_with_role(self):
-        print "test_user_creation_with_role"
+    def test_user_creation(self):
+        print "test_user_creation"
+        new_user = User(email = Email("John@gmail.com"),name = Name("John"),role = Role("admin"))
+        # correct email
+        self.assertEqual(new_user.email.value, "John@gmail.com")
+        self.assertEqual(new_user.name.value, "John")
+        self.assertEqual(new_user.role.value, "admin")
+        # incorrect email
+        self.assertRaises(TypeError,User, email = Email("John.com"),name = Name("John"),role = Role("admin"))
  #+END_SRC
 
 
@@ -224,7 +253,10 @@ class TestUser(TestCase):
 ***** Implementaion
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def set_email(self, email):
-        print "fill"
+        if isinstance(email,Email):
+            self.email = email
+        else:
+            raise TypeError('Invalid object type for email')
 #+END_SRC
 
 ***** Test
@@ -233,7 +265,10 @@ class TestUser(TestCase):
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def set_name(self, name):
-        print "fill"
+        if isinstance(name,Name):
+            self.name = name
+        else:
+            raise TypeError('Invalid object type for name')
 #+END_SRC
 ***** Test
 
@@ -241,7 +276,11 @@ class TestUser(TestCase):
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def set_role(self, role):
-        print "fill"
+        if isinstance(role,Role):
+            self.role = role
+        else:
+            raise TypeError('Invalid object type for role')
+
 #+END_SRC
 ***** Test
 
@@ -249,7 +288,7 @@ class TestUser(TestCase):
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def get_role(self):
-        print "fill"
+        return self.role
 #+END_SRC
 ***** Test
 
@@ -257,14 +296,14 @@ class TestUser(TestCase):
 **** getEmail
  #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def get_email(self):
-        print "fill"
+        return self.email
  #+END_SRC
 
 
 **** getName
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def get_name(self):
-        print "fill"
+        return self.name
 #+END_SRC
 
 
@@ -274,7 +313,7 @@ class TestUser(TestCase):
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     @staticmethod
     def get_all():
-        print "fill"
+        return User.users
 #+END_SRC
 
 
@@ -289,12 +328,11 @@ class TestUser(TestCase):
 **** toClient
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def to_client(self):
-        pass
-#        return {
-#            'name': self.name,
-#            'email': self.email,
-#            'role': self.role.to_client()
-#        }
+        return {
+            'name': self.name.to_client(),
+            'email': self.email.to_client(),
+            'role': self.role.to_client()
+        }
 #+END_SRC
 
 
@@ -321,7 +359,10 @@ class TestUser(TestCase):
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
 class Role():
-
+    
+    value = None
+    roles = ['admin','user']
+    
 #+END_SRC
 
 
@@ -333,8 +374,8 @@ class Role():
     #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def __init__(self, **kwargs):
-        print "fill"
+    def __init__(self, value):
+        self.set_role(value)
 #+END_SRC
 
 *** Test Constructor
@@ -348,11 +389,14 @@ class TestRole(TestCase):
 
 *** Functions
 
-**** setName
+**** setRole
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def set_name(self, name):
-        print "fill"
+    def set_role(self, name):
+        if name not in Role.roles:
+            raise TypeError("Invalid role type")
+        else:
+            self.value = name
 #+END_SRC
 
 ****** Test
@@ -362,22 +406,22 @@ class TestRole(TestCase):
 #+END_SRC
 
 
-**** getName
+**** getRole
 
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def get_name(self):
-        print "fill"
+    def get_role(self):
+        return self.value
 #+END_SRC
 
 
-**** getAll: Nil --> set[Role]
+**** getAllRoles: Nil --> set[Role]
 
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     @staticmethod
-    def get_all():
-#        return Role.roles
-        pass
+    def get_all_roles():
+        return Role.roles
+
 #+END_SRC
 
 
@@ -391,7 +435,7 @@ class TestRole(TestCase):
 **** to_client
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def to_client(self):
-        print "fill"
+        return self.value
 #+END_SRC
 
 * Run Test Cases
