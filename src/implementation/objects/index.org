@@ -14,6 +14,8 @@
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
 # -*- coding: utf-8 -*-
 from op_exceptions import AttributeRequired
+from op_exceptions import NotAuthorizedError
+from op_exceptions import ConstraintError
 from utils import *
 #+END_SRC
 
