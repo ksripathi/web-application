@@ -137,6 +137,7 @@ def is_email(value):
      Name is an alphabetical string.
 
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+
 class Name(object):
     value = None
     def __init__(self, value):
@@ -159,6 +160,7 @@ class Name(object):
 
 *** Test the Construction
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
+
 class TestName(TestCase):
     TESTING = True
     def test_name_type(self):
@@ -168,6 +170,7 @@ class TestName(TestCase):
         self.assertEqual(new_name.value, "John")
         # incorrect name
         self.assertRaises(TypeError, Name, "123dasd")
+
 #+END_SRC
 
 
@@ -442,10 +445,17 @@ class Role():
 
 *** Test Constructor
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
+
 class TestRole(TestCase):
     TESTING = True
     def test_role_creation(self):
-        print "test_role_creation"
+        print "test_role_construtor"
+        new_role = Name("admin")
+        # correct name
+        self.assertEqual(new_role.value, "admin")
+        # incorrect name
+        self.assertRaises(TypeError, Name, "123dasd")
+        
 #+END_SRC
 
 
