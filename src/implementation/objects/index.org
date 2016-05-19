@@ -661,7 +661,7 @@ class TestRole(TestCase):
                         search.append(user)
                         c = 1
                 if c == 0:
-                    raise ConstrainError('Name not found')
+                    raise ConstraintError('Name not found')
             
             if key == 'email':
                 c = 0
@@ -671,7 +671,7 @@ class TestRole(TestCase):
                         c = 1
                         break
                 if c == 0:
-                    raise ConstrainError('Email not found')
+                    raise ConstraintError('Email not found')
             
             if key == 'role':
                 c = 0
@@ -681,7 +681,7 @@ class TestRole(TestCase):
                         c = 1
                         break
                 if c == 0:
-                    raise ConstrainError('role not found')
+                    raise ConstraintError('role not found')
         return search
 #+END_SRC
 
