@@ -28,6 +28,8 @@ from datetime import datetime
 
 from src.obj import *
 from src.op_exceptions import AttributeRequired
+from op_exceptions import NotAuthorizedError
+from op_exceptions import ConstraintError
 
 #+END_SRC
 
@@ -73,7 +75,26 @@ class AttributeRequired(Exception):
     def __str__(self):
         return repr(self.str)
 
+class NotAuthorizedError(Exception):
+    str = None
+
+    def __init__(self, str):
+        self.str = str
+
+    def __str__(self):
+        return repr(self.str)
+        
+class ConstraintError(Exception):
+    str = None
+
+    def __init__(self, str):
+        self.str = str
+
+    def __str__(self):
+        return repr(self.str)
+
 #+END_SRC
+
 
 
 
@@ -203,6 +224,7 @@ class User():
     name = None
     email = None
     role = None
+    session = None
 #+END_SRC
 
 
@@ -218,15 +240,12 @@ class User():
     #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def __init__(self, **kwargs):
-        for key,value in kwargs.iteritems():
-            if key == 'name' :
-                self.set_name(value)
-            elif key == 'email' :
-                self.set_email(value)
-            elif key == 'role' :
-                self.set_role(value)
-        User.users.append(self)
+    def __init__(self,name,email,role = 'admin'):
+        if User.users == []:
+            self.set_email(email)
+            self.set_name(name)
+            self.set_role(Role(role))
+            User.users.append(self)
 #+END_SRC
 
 
@@ -284,6 +303,15 @@ class TestUser(TestCase):
 #+END_SRC
 ***** Test
 
+**** setSession
+***** Implementation
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def set_session(self,sess):
+        self.session = sess
+
+#+END_SRC
+***** Test
+
 **** getRole
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
@@ -305,6 +333,13 @@ class TestUser(TestCase):
     def get_name(self):
         return self.name
 #+END_SRC
+
+**** getSession
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def get_session(self):
+        return self.session
+#+END_SRC
+
 
 
 **** getAll: Nil --> set[User]
@@ -333,6 +368,31 @@ class TestUser(TestCase):
             'email': self.email.to_client(),
             'role': self.role.to_client()
         }
+#+END_SRC
+
+**** login
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    @staticmethod
+    def login(user):
+        if isinstance(user,User) and user in User.users:
+            if user.session == None:
+                sess = Session (user)
+                user.set_session(sess)
+                return sess 
+            else:
+                raise ConstraintError("User already in session")
+        else:
+            raise TypeError('Invalid user')
+#+END_SRC
+
+**** logout
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def logout(self):
+        if self.session != None:
+            self.set_session(None)
+            del(self.session)
+        else:
+            raise ConstraintError('User not loged in')
 #+END_SRC
 
 
@@ -437,6 +497,199 @@ class TestRole(TestCase):
     def to_client(self):
         return self.value
 #+END_SRC
+
+** Session
+
+*** Introduction
+   A session is the class that performs all the operations on the system.
+
+   - User :: A User object is associated with each session object.
+
+
+*** Mutable Data
+
+     These are the data associated with Session type, which are mutable
+
+
+
+*** Definition
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+class Session():
+    
+    usr = None
+    
+#+END_SRC
+
+
+*** Constructor
+
+    The signature of Session is defined as follows
+    #+BEGIN_EXAMPLE
+    role = Role(user)
+    #+END_EXAMPLE
+
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def __init__(self,user):
+        self.usr = user
+#+END_SRC
+
+*** Test Constructor
+#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
+class TestRole(TestCase):
+    TESTING = True
+    def test_role_creation(self):
+        print "test_role_creation"
+#+END_SRC
+
+
+*** Functions
+
+**** create_user
+***** Implementation
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def create_user(self,name,email,role):
+        if self.usr.role.value == 'admin':
+            for user in User.users:
+                if user.email == email:
+                    raise ConstraintError('User alredy exists!')
+            newUser = User(name,email)
+            newUser.set_name(name)
+            newUser.set_email(email)
+            newUser.set_role(role)
+            User.users.append(newUser)
+        else:
+            raise NotAuthorizedError('Only an admin can create a new user')
+#+END_SRC
+
+****** Test
+#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
+    def test_role_set_name(self):
+        print "test_role_set_name"
+#+END_SRC
+
+
+**** delete_user
+
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def delete_user(self,user):
+        if self.usr.role.value == 'admin':
+            if isinstance (user,User) and user in User.users:
+                if user.session == None:
+                    User.users.remove(user)
+                    del(user)
+                else:
+                    raise NotAuthorizedError('user in session')
+            else:
+                raise TypeError('Invalid user')
+        else:
+            raise NotAuthorizedError('You do not have he permission to delete users' )
+#+END_SRC
+
+
+**** update_role
+
+***** Implementation
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def update_role(self,user):
+        if self.usr.role.value == 'admin':
+            if isinstance (user,User) and user in User.users:
+                if user.role.value == 'user' :
+                    user.set_role(Role('admin'))
+                elif user.role.value == 'admin' and user == self.usr and self.usr.admin_check() == True:
+                    user.set_role(Role('user'))
+                else:
+                    raise  NotAuthorizedError('Operation not authorized')
+
+#+END_SRC
+
+
+***** Test update_role
+ #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
+    def test_role_get_all(self):
+        print "test_role_get_all"
+ #+END_SRC
+
+
+**** update_name
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def update_name(self,user,name):
+            if self.usr.role.value == 'admin' :
+                if isinstance (user,User) and user in User.users :
+                    user.set_name(name)
+                else:
+                    raise TypeError('Invalid User type')
+            
+            elif self.usr.role.value == 'user' :
+                if isinstance (user,User) and user in User.users and user == self.usr:
+                    user.set_name(name)
+                else:
+                    raise TypeError('Invalid User type')
+            else:
+                raise TypeError('Invalid role type')
+#+END_SRC
+
+**** update_email
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def update_email(self,user,email):
+            if self.usr.role.value == 'admin' :
+                if isinstance (email,Email) and user in User.users :
+                    user.set_email(email)
+                else:
+                    raise TypeError('Invalid User type')
+            
+            elif self.usr.role.value == 'user' :
+                if isinstance (email,Email) and user in User.users and user == self.usr:
+                    user.set_email(email)
+                else:
+                    raise TypeError('Invalid User type')
+            else:
+                raise TypeError('Invalid role type')
+#+END_SRC
+
+
+**** search_users
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def search_users(self,**kwargs):
+        search = []
+        for key,value in kwargs.iteritems():
+            if key == 'name':
+                c = 0
+                for user in User.users:
+                    if user.name.value == value:
+                        search.append(user)
+                        c = 1
+                if c == 0:
+                    raise ConstrainError('Name not found')
+            
+            if key == 'email':
+                c = 0
+                for user in User.users:
+                    if user.email.value == value:
+                        search.append(user)
+                        c = 1
+                        break
+                if c == 0:
+                    raise ConstrainError('Email not found')
+            
+            if key == 'role':
+                c = 0
+                for user in User.users:
+                    if user.email.value == value:
+                        search.append(user)
+                        c = 1
+                        break
+                if c == 0:
+                    raise ConstrainError('role not found')
+        return search
+#+END_SRC
+
+**** search_users
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def show_users(self):
+        return User.get_all()
+#+END_SRC
+
+
 
 * Run Test Cases
  
