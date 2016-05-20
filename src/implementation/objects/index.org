@@ -62,7 +62,7 @@ print "tests package"
 
 
 * Object Model*
-* Custom Exceptions
+* Custom Exceptions`
    These are some of the custom exceptions used in the application.
 
 *** AttributeRequired
@@ -225,11 +225,11 @@ class TestEmail(TestCase):
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
 class User():
-    users = []     # this is a static variable, accessed by User.users
+    
     name = None
     email = None
     role = None
-    session = None
+
 #+END_SRC
 
 
@@ -245,12 +245,12 @@ class User():
     #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def __init__(self,name,email,role = 'admin'):
-        if User.users == []:
+    def __init__(self,name,email,role):
+        
             self.set_email(email)
             self.set_name(name)
-            self.set_role(Role(role))
-            User.users.append(self)
+            self.set_role(role)
+
 #+END_SRC
 
 
@@ -308,15 +308,6 @@ class TestUser(TestCase):
 #+END_SRC
 ***** Test
 
-**** setSession
-***** Implementation
-#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def set_session(self,sess):
-        self.session = sess
-
-#+END_SRC
-***** Test
-
 **** getRole
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
@@ -339,32 +330,6 @@ class TestUser(TestCase):
         return self.name
 #+END_SRC
 
-**** getSession
-#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def get_session(self):
-        return self.session
-#+END_SRC
-
-
-
-**** getAll: Nil --> set[User]
-
-***** Implementation
-#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    @staticmethod
-    def get_all():
-        return User.users
-#+END_SRC
-
-
-***** Test getAll
-#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-    def test_user_get_all(self):
-        print "test_user_get_all"
-
-#+END_SRC
-
-
 **** toClient
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def to_client(self):
@@ -375,30 +340,6 @@ class TestUser(TestCase):
         }
 #+END_SRC
 
-**** login
-#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    @staticmethod
-    def login(user):
-        if isinstance(user,User) and user in User.users:
-            if user.session == None:
-                sess = Session (user)
-                user.set_session(sess)
-                return sess 
-            else:
-                raise ConstraintError("User already in session")
-        else:
-            raise TypeError('Invalid user')
-#+END_SRC
-
-**** logout
-#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def logout(self):
-        if self.session != None:
-            self.set_session(None)
-            del(self.session)
-        else:
-            raise ConstraintError('User not loged in')
-#+END_SRC
 
 
 
@@ -471,22 +412,14 @@ class TestRole(TestCase):
             self.value = name
 #+END_SRC
 
-****** Test
+****** Test_set_role
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
     def test_role_set_name(self):
         print "test_role_set_name"
 #+END_SRC
 
 
-**** getRole
-
-#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def get_role(self):
-        return self.value
-#+END_SRC
-
-
-**** getAllRoles: Nil --> set[Role]
+**** getAllRoles
 
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
@@ -556,102 +489,184 @@ class TestRole(TestCase):
 
 *** Functions
 
-**** create_user
-***** Implementation
+**** get_user
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def create_user(self,name,email,role):
-        if self.usr.role.value == 'admin':
-            for user in User.users:
-                if user.email == email:
+    def get_user(self):
+        return usr
+#+END_SRC
+
+**** set_user
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def set_user(self,user):
+        if isinstance(user,User) or user == None:
+            self.usr = user
+        else:
+            raise TypeError('Invalid User type')
+#+END_SRC
+
+** WebSystem
+
+*** Introduction
+   A WebSystem is the class that performs all the operations on the system.
+
+   - User :: A User object is associated with each session object.
+
+
+*** Mutable Data
+
+     These are the data associated with WebSystem type, which are mutable
+
+
+
+*** Definition
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+class WebSystem():
+    
+    users = []
+    sessions = []
+    system_active = False
+
+#+END_SRC
+
+
+*** Constructor
+
+    The signature of Session is defined as follows
+    #+BEGIN_EXAMPLE
+    role = Role(user)
+    #+END_EXAMPLE
+
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def __init__(self,name,email):
+        if  not WebSystem.system_active :
+            adminstrator = User(Name(name),Email(email),Role.admin)
+            self.users.append(adminstrator)
+            WebSystem.system_active = True
+#+END_SRC
+
+*** Test Constructor
+#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
+class TestRole(TestCase):
+    TESTING = True
+    def test_role_creation(self):
+        print "test_role_creation"
+#+END_SRC
+
+
+*** Functions
+
+**** admin_check
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def admin_check(self,user):
+        for us in WebSystem.users:
+            if us != user:
+                if us.role == Role.admin:
+                    return True
+        return False
+#+END_SRC
+
+
+**** login
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def login(self,user):
+        if isinstance(user,User) and user in WebSystem.users:
+            flag = 0
+            for sess in WebSystem.sessions:
+                if sess.get_user() == user:
+                    flag = 1
+                    break
+            if flag == 0:
+                sess = Session (user)
+                self.sessions.append(sess)
+                return sess 
+            else:
+                raise ConstraintError("User already in session")
+        else:
+            raise TypeError('Invalid user')
+#+END_SRC
+
+**** logout
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def logout(self,session):
+        if isinstance(session,Session):
+            session.set_user(None)
+            self.sessions.remove(session)
+        else:
+            raise TypeError('Invalid Session type')
+#+END_SRC
+
+**** create_user
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def create_user(self,session,name,email,role):
+        if session.usr.role == Role.admin:
+            for user in WebSystem.users:
+                if user.email.value == email:
                     raise ConstraintError('User alredy exists!')
-            newUser = User(name,email)
-            newUser.set_name(name)
-            newUser.set_email(email)
-            newUser.set_role(role)
-            User.users.append(newUser)
+            newUser = User(Name(name),Email(email),role)
+            WebSystem.users.append(newUser)
         else:
             raise NotAuthorizedError('Only an admin can create a new user')
 #+END_SRC
 
-****** Test
-#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-    def test_role_set_name(self):
-        print "test_role_set_name"
-#+END_SRC
-
-
 **** delete_user
-
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def delete_user(self,user):
-        if self.usr.role.value == 'admin':
-            if isinstance (user,User) and user in User.users:
-                if user.session == None:
-                    User.users.remove(user)
-                    del(user)
-                    return True
-                else:
-                    raise NotAuthorizedError('user in session')
+    def delete_user(self,session,user):
+        if session.usr.role == Role.admin:
+            if isinstance (user,User) and user in WebSystem.users:
+                for sess in WebSystem.sessions:
+                    if sess.usr == user:
+                        raise NotAuthorizedError('user in session')
+                        
+                User.users.remove(user)
+                del(user)
+                return True
             else:
                 raise TypeError('Invalid user')
         else:
             raise NotAuthorizedError('You do not have he permission to delete users' )
 #+END_SRC
 
-
 **** update_role
-
-***** Implementation
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def update_role(self,user):
-        if self.usr.role.value == 'admin':
-            if isinstance (user,User) and user in User.users:
-                if user.role.value == 'user' :
-                    user.set_role(Role('admin'))
-                elif user.role.value == 'admin' and user == self.usr and self.usr.admin_check() == True:
-                    user.set_role(Role('user'))
+    def update_role(self,session,user):
+        if session.usr.role == Role.admin:
+            if isinstance (user,User) and user in WebSystem.users:
+                if user.role == Role.admin :
+                    user.set_role(Role.admin)
+                elif user.role == Role.user and user == session.usr and WebSystem.admin_check(user) == True:
+                    user.set_role(Role.user)
                 else:
                     raise  NotAuthorizedError('Operation not authorized')
-
+            else:
+                raise TypeError('Invalid User type')
 #+END_SRC
-
-
-***** Test update_role
- #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-    def test_role_get_all(self):
-        print "test_role_get_all"
- #+END_SRC
-
 
 **** update_name
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def update_name(self,user,name):
-            if self.usr.role.value == 'admin' :
-                if isinstance (user,User) and user in User.users :
-                    user.set_name(name)
-                else:
-                    raise TypeError('Invalid User type')
-            
-            elif self.usr.role.value == 'user' :
-                if isinstance (user,User) and user in User.users and user == self.usr:
-                    user.set_name(name)
-                else:
-                    raise TypeError('Invalid User type')
+    def update_name(self,session,user,name):
+        if session.usr.role == Role.admin :
+            if isinstance (user,User) and user in Websystem.users :
+                user.set_name(name)
+        elif session.usr.role == Role.user :
+            if isinstance (user,User) and user in WebSystem.users and user == session.usr:
+                user.set_name(name)
             else:
-                raise TypeError('Invalid role type')
+                raise NotAuthorizedError('Only an admin can change the names of other users')
+        else:
+            raise TypeError('Invalid User type')
 #+END_SRC
 
 **** update_email
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def update_email(self,user,email):
-            if self.usr.role.value == 'admin' :
-                if isinstance (email,Email) and user in User.users :
+    def update_email(self,session,user,email):
+            if session.usr.role == Role.admin :
+                if isinstance (email,Email) and user in Websystem.users :
                     user.set_email(email)
                 else:
                     raise TypeError('Invalid User type')
             
-            elif self.usr.role.value == 'user' :
-                if isinstance (email,Email) and user in User.users and user == self.usr:
+            elif session.usr.role == Role.user :
+                if isinstance (email,Email) and user in Websystem.users and user == session.usr:
                     user.set_email(email)
                 else:
                     raise TypeError('Invalid User type')
@@ -659,47 +674,65 @@ class TestRole(TestCase):
                 raise TypeError('Invalid role type')
 #+END_SRC
 
-
 **** search_users
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
-    def search_users(self,**kwargs):
-        search = []
-        for key,value in kwargs.iteritems():
-            if key == 'name':
-                c = 0
-                for user in User.users:
-                    if user.name.value == value:
-                        search.append(user)
-                        c = 1
-                if c == 0:
-                    raise ConstraintError('Name not found')
-            
-            if key == 'email':
-                c = 0
-                for user in User.users:
-                    if user.email.value == value:
-                        search.append(user)
-                        c = 1
-                        break
-                if c == 0:
-                    raise ConstraintError('Email not found')
-            
-            if key == 'role':
-                c = 0
-                for user in User.users:
-                    if user.email.value == value:
-                        search.append(user)
-                        c = 1
-                        break
-                if c == 0:
-                    raise ConstraintError('role not found')
-        return search
+    def search_users(self,session,**kwargs):
+        if session.usr in WebSystem.users:
+            search = []
+            for key,value in kwargs.iteritems():
+                if key == 'name':
+                    c = 0
+                    for user in WebSystem.users:
+                        if user.name.value == value:
+                            search.append(user)
+                            c = 1
+                    if c == 0:
+                        raise ConstraintError('Name not found')
+                
+                if key == 'email':
+                    c = 0
+                    for user in WebSystem.users:
+                        if user.email.value == value:
+                            search.append(user)
+                            c = 1
+                            break
+                    if c == 0:
+                        raise ConstraintError('Email not found')
+                
+                if key == 'role':
+                    c = 0
+                    for user in WebSystem.users:
+                        if user.email.value == value:
+                            search.append(user)
+                            c = 1
+                            break
+                    if c == 0:
+                        raise ConstraintError('role not found')
+            if search == []:
+                return False
+            return search
+        raise ConstraintError('Session not found')
 #+END_SRC
 
-**** search_users
+**** show_users
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def show_users(self):
-        return User.get_all()
+        return WebSystem.users
+#+END_SRC
+
+**** get_sessions
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def get_sessions(self):
+        return WebSystem.sessions
+#+END_SRC
+
+**** get_user_from_email
+#+BEGIN_SRC python :tangle ../../src/obj.py :eval no
+    def get_user_from_email(self,email):
+        for users in WebSystem.users:
+            if users.get_email().value == email:
+                return users
+        return False
 #+END_SRC
 
 
