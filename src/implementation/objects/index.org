@@ -589,6 +589,7 @@ class TestRole(TestCase):
                 if user.session == None:
                     User.users.remove(user)
                     del(user)
+                    return True
                 else:
                     raise NotAuthorizedError('user in session')
             else:
