@@ -925,12 +925,50 @@ class test_search_users(TestCase):
         return self.users
 #+END_SRC
 
+****  test_show_users
+#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
+
+class test_show_users(TestCase):
+    TESTING = True
+    def test_show_users(self):
+        print 'test show users'
+        system = setUp()
+        sess = system.login(system.get_user_from_email('shashank@gmail.com'))
+        system.create_user(sess,'messi','messi@gmail.com',Role.user)
+        system.create_user(sess,'barca','barca@barca.com',Role.user)
+        self.assertTrue(len(system.show_users()) == 3)
+        system.logout(sess)
+        tearDown(system)
+
+#+END_SRC
+
 **** get_sessions
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def get_sessions(self):
         return self.sessions
 #+END_SRC
 
+****  test_get_sessions
+#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
+
+class test_get_sessions(TestCase):
+    TESTING = True
+    def test_get_sessions(self):
+        print 'test get sessions'
+        system = setUp()
+        sess = system.login(system.get_user_from_email('shashank@gmail.com'))
+        system.create_user(sess,'messi','messi@gmail.com',Role.user)
+        system.create_user(sess,'barca','barca@barca.com',Role.user)
+        sess1 = system.login(system.get_user_from_email('messi@gmail.com'))
+        sess2 = system.login(system.get_user_from_email('barca@barca.com'))
+        self.assertTrue(len(system.get_sessions()) == 3) 
+        system.logout(sess)
+        system.logout(sess1)
+        system.logout(sess2)
+        tearDown(system)
+
+#+END_SRC
+        
 **** get_user_from_email
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def get_user_from_email(self,email):
