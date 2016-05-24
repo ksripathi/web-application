@@ -598,8 +598,6 @@ class WebSystem(TestCase):
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class login(TestCase):
-    TESTING = True
     def test_login(self):
         print 'login test'
         system = setUp()
@@ -629,8 +627,6 @@ class login(TestCase):
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class logout(TestCase):
-    TESTING = True
     def test_logout(self):
         print 'logout test'
         system = setUp()
@@ -662,8 +658,7 @@ class logout(TestCase):
 ****  test_create_user
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-class test_create_user(TestCase):
-    TESTING = True
+
     def test_create_user(self):
         print 'create user test'
         system = setUp()
@@ -702,8 +697,7 @@ class test_create_user(TestCase):
 ****  test_delete_user
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-class test_delete_user(TestCase):
-    TESTING = True
+
     def test_delete_user(self):
         print 'delete user test'
         system = setUp()
@@ -751,8 +745,6 @@ class test_delete_user(TestCase):
 ****  test_update_role
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_update_role(TestCase):
-    TESTING = True
     def test_update_role(self):
         print 'test update role'
         system = setUp()
@@ -797,8 +789,6 @@ class test_update_role(TestCase):
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_update_name(TestCase):    
-    TESTING = True
     def test_update_name(self):
         print 'update name test'
         system = setUp()
@@ -837,8 +827,6 @@ class test_update_name(TestCase):
 ****  test_update_email
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_update_email(TestCase):
-    TESTING = True
     def test_update_email(self):
         print 'test update email'
         system = setUp()
@@ -899,8 +887,6 @@ class test_update_email(TestCase):
 ****  test_search_users
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_search_users(TestCase):
-    TESTING = True
     def test_search_users(self):
         print 'test search users'
         system = setUp()
@@ -928,8 +914,6 @@ class test_search_users(TestCase):
 ****  test_show_users
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_show_users(TestCase):
-    TESTING = True
     def test_show_users(self):
         print 'test show users'
         system = setUp()
@@ -951,8 +935,7 @@ class test_show_users(TestCase):
 ****  test_get_sessions
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_get_sessions(TestCase):
-    TESTING = True
+
     def test_get_sessions(self):
         print 'test get sessions'
         system = setUp()
