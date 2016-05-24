@@ -37,19 +37,6 @@ from src.op_exceptions import ConstraintError
 #+END_SRC
 
 
-** Imports for utility functions
-
-#+BEGIN_SRC python :tangle ../../src/utils.py :eval no
-
-# module to hold all utilities/helper functions
-
-import json
-
-import re
-
-
-#+END_SRC
-
 
 ** Init Files
 #+BEGIN_SRC python :tangle ../../src/__init__.py :eval no
@@ -62,8 +49,8 @@ print "tests package"
 
 
 
-* Object Model*
-* Custom Exceptions`
+* Object Model
+* Custom Exceptions
    These are some of the custom exceptions used in the application.
 
 *** AttributeRequired
@@ -102,34 +89,6 @@ class ConstraintError(Exception):
 
 
 
-** Utility Functions
-
-*** is_alphabetic_string(value)
-    This function take an argument and checks whether the argument contains
-    only alphabets.
-
-#+BEGIN_SRC  python :tangle ../../src/utils.py :eval no
-def is_alphabetic_string(value):
-    if re.search('[^a-zA-Z. ]+', value):
-        return False
-    else:
-        return True
-#+END_SRC
-
-
-*** is_email(value)
-    Email is a type as defined in RFC [[https://tools.ietf.org/html/rfc5321][5321]], [[https://tools.ietf.org/html/rfc5322][5322]] and [[https://tools.ietf.org/html/rfc6531][6531]].
-    Following is the constructor for this class.
-
-#+BEGIN_SRC python :tangle ../../src/utils.py :eval no
-def is_email(value):
-    if re.search('[^@]+@[^@]+\.[^@]+', value):
-        return True
-    else:
-        return False
-#+END_SRC
-
-
 
 ** Name
 
@@ -164,6 +123,8 @@ class Name(object):
 
 class TestName(TestCase):
     TESTING = True
+    
+
     def test_name_type(self):
         print "test_name_type"
         new_name = Name("John")
@@ -203,6 +164,8 @@ class Email(object):
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 class TestEmail(TestCase):
     TESTING = True
+    
+
     def test_email_type(self):
         print "test_email_type"
         new_email = Email("John@gmail.com")
@@ -259,6 +222,7 @@ class User():
  #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 class TestUser(TestCase):
     TESTING = True
+    
 
     def test_user_creation(self):
         print "test_user_creation"
@@ -392,6 +356,8 @@ class Role():
 
 class TestRole(TestCase):
     TESTING = True
+    
+
     def test_role_creation(self):
         print "test_role_construtor"
         new_role = Name("admin")
@@ -550,6 +516,7 @@ class WebSystem():
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 class WebSystem(TestCase):
     TESTING = True
+
     def test_WebSystem_cretion(self):
         print 'WebSystem creation test'
         system = setUp()
@@ -598,8 +565,6 @@ class WebSystem(TestCase):
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class login(TestCase):
-    TESTING = True
     def test_login(self):
         print 'login test'
         system = setUp()
@@ -629,8 +594,6 @@ class login(TestCase):
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class logout(TestCase):
-    TESTING = True
     def test_logout(self):
         print 'logout test'
         system = setUp()
@@ -662,8 +625,7 @@ class logout(TestCase):
 ****  test_create_user
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-class test_create_user(TestCase):
-    TESTING = True
+
     def test_create_user(self):
         print 'create user test'
         system = setUp()
@@ -702,8 +664,7 @@ class test_create_user(TestCase):
 ****  test_delete_user
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-class test_delete_user(TestCase):
-    TESTING = True
+
     def test_delete_user(self):
         print 'delete user test'
         system = setUp()
@@ -751,8 +712,6 @@ class test_delete_user(TestCase):
 ****  test_update_role
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_update_role(TestCase):
-    TESTING = True
     def test_update_role(self):
         print 'test update role'
         system = setUp()
@@ -797,8 +756,7 @@ class test_update_role(TestCase):
 
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_update_name(TestCase):    
-    TESTING = True
+
     def test_update_name(self):
         print 'update name test'
         system = setUp()
@@ -837,8 +795,6 @@ class test_update_name(TestCase):
 ****  test_update_email
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_update_email(TestCase):
-    TESTING = True
     def test_update_email(self):
         print 'test update email'
         system = setUp()
@@ -897,10 +853,7 @@ class test_update_email(TestCase):
 #+END_SRC
 
 ****  test_search_users
-#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-
-class test_search_users(TestCase):
-    TESTING = True
+#+BEGIN_SRC python :tangle ../../tests/test_obj.py : eval no
     def test_search_users(self):
         print 'test search users'
         system = setUp()
@@ -928,8 +881,6 @@ class test_search_users(TestCase):
 ****  test_show_users
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_show_users(TestCase):
-    TESTING = True
     def test_show_users(self):
         print 'test show users'
         system = setUp()
@@ -951,8 +902,6 @@ class test_show_users(TestCase):
 ****  test_get_sessions
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
-class test_get_sessions(TestCase):
-    TESTING = True
     def test_get_sessions(self):
         print 'test get sessions'
         system = setUp()
