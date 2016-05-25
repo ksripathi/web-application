@@ -269,7 +269,13 @@ class TestName(TestCase):
         system = setUp()
         self.assertEqual(Name.query.get(1).value, "shashank")
         # incorrect name
-        #self.assertRaises(TypeError, Name, "123dasd")
+        self.assertRaises(TypeError, Name, "123dasd")
+        tearDown(system)
+    
+    def test_name_get_by_id(self):
+        print "test_name_get_by_id"
+        system = setUp()
+        self.assertEquals(Name.get_by_id(1).value, "shashank")
         tearDown(system)
 #+END_SRC
 
@@ -395,9 +401,7 @@ class TestUser(TestCase):
         # correct email
         self.assertEqual(User.query.get(1).email.value, "shashank@gmail.com")
         self.assertEqual(User.query.get(1).name.value, "shashank")
-        self.assertEqual(User.query.get(1).role.value, "admin")
-        # incorrect email
-        #self.assertRaises(TypeError,User,(Name("John"),Email("John@gmail.com"),Role.admin))
+        self.assertEqual(User.query.get(1).role.value, "admin")       
         tearDown(system)
  #+END_SRC
 
@@ -415,6 +419,18 @@ class TestUser(TestCase):
 #+END_SRC
 
 ***** Test
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_set_email(self):
+        print "test_set_email"
+        system = setUp()
+        us = User.get_by_id(1)
+        em = Email('shashankviswanadha@gmail.com')
+        us.set_email(em)
+        us.save()
+        self.assertEqual(User.get_by_id(1).email.value,'shashankviswanadha@gmail.com')
+        tearDown(system)
+#+END_SRC
+
 
 **** setName
 ***** Implementation
@@ -426,7 +442,17 @@ class TestUser(TestCase):
             raise TypeError('Invalid object type for name')
 #+END_SRC
 ***** Test
-
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_set_name(self):
+        print "test_set_name"
+        system = setUp()
+        us = User.get_by_id(1)
+        na = Name('shashankviswanadha')
+        us.set_name(na)
+        us.save()
+        self.assertEqual(User.get_by_id(1).name.value,'shashankviswanadha')
+        tearDown(system)
+#+END_SRC
 **** setRole
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -438,7 +464,16 @@ class TestUser(TestCase):
 
 #+END_SRC
 ***** Test
-
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_set_role(self):
+        print "test_set_name"
+        system = setUp()
+        us = User.get_by_id(1)
+        us.set_role(Role.get_by_id(2))
+        us.save()
+        self.assertEqual(User.get_by_id(1).role.value,'user')
+        tearDown(system)
+#+END_SRC
 **** getRole
 ***** Implementation
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -446,19 +481,45 @@ class TestUser(TestCase):
         return self.role
 #+END_SRC
 ***** Test
-
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_get_role(self):
+        print "test_get_role"
+        system = setUp()
+        us = User.get_by_id(1)
+        self.assertEqual(us.get_role().value,'admin')
+        tearDown(system)
+#+END_SRC
 
 **** getEmail
+*****  Implemetation
  #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_email(self):
         return self.email
  #+END_SRC
-
+***** Test
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_get_email(self):
+        print "test_get_email"
+        system = setUp()
+        us = User.get_by_id(1)
+        self.assertEqual(us.get_email().value,'shashank@gmail.com')
+        tearDown(system)
+#+END_SRC
  
 **** getName
+*****  Implemetation
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_name(self):
         return self.name
+#+END_SRC
+***** Test
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_get_name(self):
+        print "test_get_name"
+        system = setUp()
+        us = User.get_by_id(1)
+        self.assertEqual(us.get_name().value,'shashank')
+        tearDown(system)
 #+END_SRC
 
 **** toClient
@@ -744,20 +805,24 @@ class WebSystem():
 
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def __init__(self,name,email):
-        if not WebSystem.system_active :
-            na = Name(name)
-            em = Email(email)
-            na.save()
-            em.save()
-            Us = User(na,em,Role.get_by_id(1))
-            Us.save()
-            WebSystem.system_active = True
-	    self.users = User.get_all()
+        if User.get_all() == []:
+            if not WebSystem.system_active and User.get_all() == [] :
+                na = Name(name)
+                em = Email(email)
+                na.save()
+                em.save()
+                Us = User(na,em,Role.get_by_id(1))
+                Us.save()
+                WebSystem.system_active = True
+	        self.users = User.get_all()
+            else:
+                WebSystem.system_active = True
+        
 #+END_SRC
 
 *** Test Constructor
 #+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
-class WebSystem(TestCase):
+class WebSystem_test(TestCase):
     TESTING = True
     def create_app(self):
         app = create_app(config)
@@ -1138,20 +1203,21 @@ class WebSystem(TestCase):
 #+END_SRC
 **** show_users
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
-    def show_users(self):
+    def get_users(self):
+        self.users = User.get_all()
         return self.users
 #+END_SRC
 
-****  test_show_users
+****  test_get_users
 #+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
 
-    def test_show_users(self):
-        print 'test show users'
+    def test_get_users(self):
+        print 'test_get_ users'
         system = setUp()
         sess = system.login(system.get_user_from_email('shashank@gmail.com'))
         system.create_user(sess,'messi','messi@gmail.com',Role.get_by_id(2))
         system.create_user(sess,'barca','barca@barca.com',Role.get_by_id(2))
-        self.assertTrue(len(system.show_users()) == 3)
+        self.assertTrue(len(system.get_users()) == 3)
         system.logout(sess)
         tearDown(system)
 
@@ -1191,6 +1257,77 @@ class WebSystem(TestCase):
                 return user
         return False
 #+END_SRC
+
+**** get_name
+***** Implementation
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def get_user_name(self,session,user):
+        if session in self.sessions:
+            if isinstance(user,User):
+                return user.get_name()
+            else:
+                raise TypeError('Invalid user')
+        raise TypeError('Invalid session')
+#+END_SRC
+***** Test
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_get_user_name(self):
+        print "test_get_user_name"
+        system = setUp()
+        us = User.get_by_id(1)
+        sess = system.login(us)
+        self.assertEquals(system.get_user_name(sess,us).value, 'shashank')
+        system.logout(sess)
+        tearDown(system)
+#+END_SRC
+
+**** get_email
+***** Implementation
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def get_user_email(self,session,user):
+        if session in self.sessions:
+            if isinstance(user,User):
+                return user.get_email()
+            else:
+                raise TypeError('Invalid user')
+        raise TypeError('Invalid session')
+#+END_SRC
+***** Test
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_get_user_email(self):
+        print "test_get_user_email"
+        system = setUp()
+        us = User.get_by_id(1)
+        sess = system.login(us)
+        self.assertEquals(system.get_user_email(sess,us).value, 'shashank@gmail.com')
+        system.logout(sess)
+        tearDown(system)
+#+END_SRC
+
+**** get_role
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def get_user_role(self,session,user):
+        if session in self.sessions:
+            if isinstance(user,User):
+                return user.get_role()
+            else:
+                raise TypeError('Invalid user')
+        raise TypeError('Invalid session')
+#+END_SRC
+***** Test
+#+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
+    def test_get_user_role(self):
+        print "test_get_user_role"
+        system = setUp()
+        us = User.get_by_id(1)
+        sess = system.login(us)
+        self.assertEquals(system.get_user_role(sess,us), Role.get_by_id(1))
+        system.logout(sess)
+        tearDown(system)
+#+END_SRC
+
+        
+
 
 **  setUp and tearDown
 
