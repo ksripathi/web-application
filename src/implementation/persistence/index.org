@@ -689,7 +689,18 @@ class Session():
 
 *** Test Constructor
 #+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
-
+class TestSession(TestCase)
+    TESTING = True
+    def create_app(self):
+        app = create_app(config)
+        return app
+ #ADDED  
+    def test_session_creation(TestCase)
+        print "test_session_creation"
+        system=setUp()
+        self.assertEqual(system.users[0].role.value,'admin')
+        system = tearDown(system)
+        
 #+END_SRC
 
 
@@ -701,6 +712,18 @@ class Session():
         return self.usr
 #+END_SRC
 
+**** test_get_user
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+
+    def test_get_user(self):
+#ADDED
+        print "test_get_user"
+        system = setUp()
+        usr=system.get_user()
+        self.assertEquals(user.name.value,'shashank')
+        system = tearDown(system)
+#+END_SRC
+
 **** set_user
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def set_user(self,user):
@@ -708,6 +731,19 @@ class Session():
             self.usr = user
         else:
             raise TypeError('Invalid User type')
+#+END_SRC
+
+**** test_set_user
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def test_set_user(self,user):
+    #ADDED
+        print "test_set_user"
+        system = setUp()
+        sess2=system.create_user(sess,'srivalya','srivalya@gmail.com',Role.get_by_id(2))
+        sess2.set_user(None)
+        self.assertEquals(sess2.get_user(),None)
+        self.sessions.remove(session)
+        system = tearDown(system)
 #+END_SRC
 
 ** WebSystem
@@ -783,6 +819,20 @@ class WebSystem(TestCase):
                 if us.role == Role.get_by_id(1):
                     return True
         return False
+#+END_SRC
+
+**** test_admin_check
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def test_admin_check(self,user):
+    #ADDED
+       print "test_admin_check"
+       system=setUp()
+       #shashank is an admin
+       self.assertTrue(system.admin_check(system.users[0]))
+       system.create_user(sess,'messi','messi@gmail.com',Role.get_by_id(2))
+       #is not an admin
+       self.assertFalse(system.admin_check(system.get_user_from_email('messi@gmail.com'))
+       system = tearDown(system)
 #+END_SRC
 
 
