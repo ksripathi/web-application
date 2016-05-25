@@ -1,0 +1,291 @@
+#+TITLE: The Application Server
+#+AUTHOR: VLEAD
+#+DATE: [2016-05-11 Wed]
+#+PROPERTY: results output
+#+PROPERTY: exports code
+#+SETUPFILE: ../org-templates/level-1.org
+#+options: ^:nil
+#+LATEX: Literal LaTeX code for export
+
+
+* REST
+
+** Initialization
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+
+# -*- coding: utf-8 -*-
+
+import os
+import csv
+import requests
+from datetime import datetime
+import inspect
+from flask import session, render_template, Blueprint, request, jsonify, abort,\
+    current_app, redirect, url_for
+from config import *
+from flask import current_app
+
+from flask import Flask, redirect, url_for
+from werkzeug import secure_filename
+
+from db import *
+from utils import parse_request, jsonify_list
+api = Blueprint('APIs', __name__)
+#+END_SRC
+
+
+** GET all users
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/users', methods=['GET'])
+def get_users():
+    return jsonify_list([i.to_client() for i in User.get_all()])
+#+END_SRC
+   
+
+** GET all roles
+   The is the REST API to get all the roles.
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/roles', methods=['GET'])
+def get_roles():
+    return jsonify_list([i.to_client() for i in Role.get_all_roles()])
+#+END_SRC
+
+** GET all names
+   The is the REST API to get all the names.
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/names', methods=['GET'])
+def get_names():
+    return jsonify_list([i.to_client() for i in Name.get_all_names()])
+#+END_SRC
+
+
+** GET all emails
+   The is the REST API to get all the roles.
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/emails', methods=['GET'])
+def get_emails():
+    return jsonify_list([i.to_client() for i in Email.get_all_emails()])
+#+END_SRC
+
+
+** GET a user with id
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/users/<int:id>', methods=['GET'])
+def get_user_by_id(id):
+    record = User.get_by_id(id)
+    if not record:
+        abort(404, "No entry for %s with id: %s found." % ("user", id))
+
+    return jsonify(record.to_client())
+#+END_SRC
+
+
+
+** GET a role with id
+   
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/roles/<int:id>', methods=['GET'])
+def get_role_by_id(id):
+    record = Role.get_by_id(id)
+    if not record:
+        abort(404, "No entry for %s with id: %s found." % ("role", id))
+
+    return jsonify(record.to_client())
+#+END_SRC
+
+** GET a name with id
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/names/<int:id>', methods=['GET'])
+def get_name_by_id(id):
+    record = Name.get_by_id(id)
+    if not record:
+        abort(404, "No entry for %s with id: %s found." % ("name", id))
+
+    return jsonify(record.to_client())
+#+END_SRC
+
+** GET an email with id
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/emails/<int:id>', methods=['GET'])
+def get_email_by_id(id):
+    record = Email.get_by_id(id)
+    if not record:
+        abort(404, "No entry for %s with id: %s found." % ("email", id))
+
+    return jsonify(record.to_client())
+#+END_SRC
+
+** Create a user
+   Usage:
+   #+BEGIN_EXAMPLE
+   POST request
+   {
+   "name": "Jimi hendrix",
+   "email": "jimi@gmail.com",
+   "role_id": 1
+   "session": "admin@vlabs.com"
+   }
+
+    OR
+   
+    {
+    "name": "Jimi hendrix",
+    "email": "jimi@gmail.com",
+    }
+   #+END_EXAMPLE
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/users', methods=['POST'])
+def create_user():
+    if not request.json or not 'name' in request.json or not 'email' in request.json:
+        abort(400)
+    else:
+        name = request.json['name']
+        email = request.json['email']
+        role_id = request.json['role_id']        
+        try:
+            role = Role.get_by_id(role_id)
+            session_email = Email(request.json['session'])
+            session = system.get_session_from_email(session_email)
+            create_app.system.create_user(session,name,email,role)
+            return jsonify(user.to_client())
+        except Exception, e:
+            current_app.logger.error("Error occured while inserting"
+                                     "user record: %s" % str(e))
+            abort(500, str(e))
+#+END_SRC
+
+** Delete a user
+   Usage:
+   #+BEGIN_EXAMPLE
+   POST request
+   {
+   "session": "admin@vlabs.com"
+   }
+
+   #+END_EXAMPLE
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/users<int:id>', methods=['DELETE'])
+def delete_user():
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    else:
+        user = User.get_by_id(id)
+        if not user:
+            abort(404, "No entry for %s with id: %s found." % ("user", id))
+        try:
+            session_email = Email(request.json['session'])
+            session = system.get_session_from_email(session_email)
+            create_app.system.delete_user(session,user)
+        except Exception, e:
+            current_app.logger.error("Error occured while inserting"
+                                     "user record: %s" % str(e))
+            abort(500, str(e))
+#+END_SRC
+
+
+** Update the role of a user
+   Usage:
+   #+BEGIN_EXAMPLE
+   POST request
+   {
+   "session": "admin@vlabs.com"
+   }
+
+   #+END_EXAMPLE
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/users<int:id>', methods=['PUT'])
+def update_role():
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    else:
+        user = User.get_by_id(id)
+        if not user:
+            abort(404, "No entry for %s with id: %s found." % ("user", id))
+        try:
+            session_email = Email(request.json['session'])
+            session = system.get_session_from_email(session_email)
+            create_app.system.update_role(session,user)
+        except Exception, e:
+            current_app.logger.error("Error occured while updating"
+                                     "user record: %s" % str(e))
+            abort(500, str(e))
+#+END_SRC
+
+
+** Update the name of a user
+   Usage:
+   #+BEGIN_EXAMPLE
+   POST request
+   {
+   "session": "admin@vlabs.com"
+   "name": "Mike Shinoda"
+   }
+
+   #+END_EXAMPLE
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/users<int:id>', methods=['PUT'])
+def update_name():
+    if not request.json or not 'session' in request.json or not 'name' in request.json:
+        abort(400)
+    else:
+        user = User.get_by_id(id)
+        name = request.json(['name'])
+        if not user:
+            abort(404, "No entry for %s with id: %s found." % ("user", id))
+        try:
+            session_email = Email(request.json['session'])
+            session = system.get_session_from_email(session_email)
+            create_app.system.update_name(session,user,Name(name))
+        except Exception, e:
+            current_app.logger.error("Error occured while updating"
+                                     "user record: %s" % str(e))
+            abort(500, str(e))
+#+END_SRC
+
+
+** Update the email of a user
+   Usage:
+   #+BEGIN_EXAMPLE
+   POST request
+   {
+   "session": "admin@vlabs.com"
+   "email": "shashank@gmail.com"
+   }
+
+   #+END_EXAMPLE
+
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/users<int:id>', methods=['PUT'])
+def update_email():
+    if not request.json or not 'session' in request.json or not 'email' in request.json:
+        abort(400)
+    else:
+        user = User.get_by_id(id)
+        email = request.json(['email'])
+        if not user:
+            abort(404, "No entry for %s with id: %s found." % ("user", id))
+        try:
+            session_email = Email(request.json['session'])
+            session = system.get_session_from_email(session_email)
+            create_app.system.update_email(session,user,Email(email))
+            return jsonify(user.to_client())
+        except Exception, e:
+            current_app.logger.error("Error occured while updating"
+                                     "user record: %s" % str(e))
+            abort(500, str(e))
+#+END_SRC
+
+
+
+

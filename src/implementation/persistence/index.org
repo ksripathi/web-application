@@ -219,7 +219,7 @@ def str_to_bool(s):
 
 
 * Object Relational Model
-
+  
 ** Name
 
 *** Construction
@@ -247,11 +247,15 @@ class Name(Entity):
         return self.value
         
     def to_client(self):
-        return self.value
+        return {'name':self.value}
 
     @staticmethod
     def get_by_id(id):
         return Name.query.get(id)
+    @staticmethod
+    def get_all_names():
+        return Name.query.all()
+        
 
 #+END_SRC
 
@@ -305,11 +309,15 @@ class Email(Entity):
         return self.value
         
     def to_client(self):
-        return self.value
+        return {'email' : self.value}
 
     @staticmethod
     def get_by_id(id):
         return Email.query.get(id)
+
+    @staticmethod
+    def get_all_emails():
+        return Email.query.all()
 #+END_SRC
 
 
@@ -405,7 +413,7 @@ class TestUser(TestCase):
         tearDown(system)
  #+END_SRC
 
-
+ 
 *** Functions
 
 **** setEmail
@@ -414,6 +422,7 @@ class TestUser(TestCase):
     def set_email(self, email):
         if isinstance(email,Email):
             self.email = email
+            
         else:
             raise TypeError('Invalid object type for email')
 #+END_SRC
@@ -427,7 +436,8 @@ class TestUser(TestCase):
         em = Email('shashankviswanadha@gmail.com')
         us.set_email(em)
         us.save()
-        self.assertEqual(User.get_by_id(1).email.value,'shashankviswanadha@gmail.com')
+        em.save()
+        self.assertEqual(Email.get_by_id(2).value,'shashankviswanadha@gmail.com')
         tearDown(system)
 #+END_SRC
 
@@ -438,6 +448,7 @@ class TestUser(TestCase):
     def set_name(self, name):
         if isinstance(name,Name):
             self.name = name
+            
         else:
             raise TypeError('Invalid object type for name')
 #+END_SRC
@@ -450,7 +461,8 @@ class TestUser(TestCase):
         na = Name('shashankviswanadha')
         us.set_name(na)
         us.save()
-        self.assertEqual(User.get_by_id(1).name.value,'shashankviswanadha')
+        na.save()
+        self.assertEqual(Name.get_by_id(2).value,'shashankviswanadha')
         tearDown(system)
 #+END_SRC
 **** setRole
@@ -526,9 +538,9 @@ class TestUser(TestCase):
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def to_client(self):
         return {
-            'name': self.name.to_client(),
-            'email': self.email.to_client(),
-            'role': self.role.to_client()
+            'name': self.name.value,
+            'email': self.email.value,
+            'role': self.role.value
         }
 #+END_SRC
 
@@ -678,7 +690,7 @@ class TestRole(TestCase):
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     @staticmethod
     def get_all_roles():
-        return Role.roles
+        return Role.query.all()
 
 #+END_SRC
 
@@ -688,7 +700,7 @@ class TestRole(TestCase):
     def test_role_get_all(self):
         print "test_role_get_all" 
         system = setUp()
-        boo = Role.get_all_roles() == ['admin','user']
+        boo = Role.get_all_roles() == [Role.get_by_id(1),Role.get_by_id(2)]
         self.assertTrue(boo)
         tearDown(system)
         
@@ -699,7 +711,7 @@ class TestRole(TestCase):
 **** to_client
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def to_client(self):
-        return self.value
+        return {'role' :self.value}
 
 #+END_SRC
 
@@ -1064,15 +1076,23 @@ class WebSystem_test(TestCase):
     def update_name(self,session,user,name):
         if session.usr.role.value == 'admin' :
             if isinstance (user,User) and user in self.users :
+                old_name = user.name
+                name.save()
                 user.set_name(name)
                 user.save()
+                if old_name.users == []:
+                    old_name.delete()
                 self.users = User.get_all()
             else:
                 raise TypeError('Invalid Email Type')
         elif session.usr.role.value == 'user' :
             if isinstance (user,User) and user in self.users and user == session.usr:
+                old_name = user.name
                 user.set_name(name)
+                name.save()
                 user.save()
+                if old_name.users == []:
+                    old_name.delete()
                 self.users = User.get_all()
             else:
                 raise NotAuthorizedError('Only an admin can change the names of other users')
@@ -1089,6 +1109,7 @@ class WebSystem_test(TestCase):
         sess = system.login(system.get_user_from_email('shashank@gmail.com'))
         system.create_user(sess,'srivalya','srivalya@gmail.com',Role.get_by_id(2))
         system.create_user(sess,'barca','barca@barca.com',Role.get_by_id(2))
+        system.create_user(sess,'srivalya','sri@mail.com',Role.get_by_id(2))
         system.update_name(sess,system.get_user_from_email('srivalya@gmail.com'),Name('sri'))
         self.assertTrue(system.get_user_from_email('srivalya@gmail.com').name.value == 'sri')
         sess1 = system.login(system.get_user_from_email('barca@barca.com'))
@@ -1107,6 +1128,7 @@ class WebSystem_test(TestCase):
             if session.usr.role == Role.get_by_id(1) :
                 if isinstance (email,Email) and user in self.users :
                     user.set_email(email)
+                    email.save()
                     user.save()
                     self.users = User.get_all()
                 else:
@@ -1114,6 +1136,7 @@ class WebSystem_test(TestCase):
             elif session.usr.role == Role.get_by_id(2) :
                 if isinstance (email,Email) and user in self.users and user == session.usr:
                     user.set_email(email)
+                    email.save()
                     user.save()
                     self.users = User.get_all()
                 else:
@@ -1201,7 +1224,7 @@ class WebSystem_test(TestCase):
         
 
 #+END_SRC
-**** show_users
+**** get_users
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_users(self):
         self.users = User.get_all()
@@ -1251,11 +1274,31 @@ class WebSystem_test(TestCase):
 **** get_user_from_email
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_user_from_email(self,email):
-        
-        for user in self.users:
-            if user.get_email().value == email:
-                return user
-        return False
+            for user in self.users:
+                if user.get_email().value == email:
+                    return user
+            return False
+#+END_SRC
+
+**** get_session_from_user
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def get_session_from_user(self,user):
+        if isinstance(user,User):
+            for sess in self.sessions:
+                if sess.usr == user:
+                    return session
+            raise ConstraintError("User not in session")
+        else:
+            raise TypeError('Not a valid user')
+#+END_SRC
+
+**** get_session_from_email
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def get_session_from_email(self,email):
+        us = system.get_user_from_email(email)
+        if us != False:
+            return system.get_session_from_user(us)
+        raise ConstraintError("User not in system")
 #+END_SRC
 
 **** get_name
