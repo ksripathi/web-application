@@ -31,95 +31,245 @@ from werkzeug import secure_filename
 from db import *
 from utils import parse_request, jsonify_list
 api = Blueprint('APIs', __name__)
+
 #+END_SRC
-
-
 ** GET all users
-
+Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+   #+END_EXAMPLE
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/users', methods=['GET'])
 def get_users():
-    return jsonify_list([i.to_client() for i in User.get_all()])
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    try:
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        users = system.get_users(session)
+        system.logout(system.get_session_from_email(session_email))
+        return jsonify_list([i.to_client() for i in users])
+    except Exception, e:
+        current_app.logger.error("Error occured while getting users"
+                                     "user record: %s" % str(e))
+        print str(e)                             
+        system.logout(system.get_session_from_email(session_email))
+        abort(500, str(e))
+
 #+END_SRC
    
-
 ** GET all roles
    The is the REST API to get all the roles.
+Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+   #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/roles', methods=['GET'])
 def get_roles():
-    return jsonify_list([i.to_client() for i in Role.get_all_roles()])
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    try:
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        roles = system.get_roles(session)
+        system.logout(system.get_session_from_email(session_email))
+        return jsonify_list([i.to_client() for i in roles])
+    except Exception, e:
+        current_app.logger.error("Error occured while getting roles"
+                                     "user record: %s" % str(e))
+        system.logout(system.get_session_from_email(session_email))
+        abort(500, str(e))
+       
 #+END_SRC
 
 ** GET all names
    The is the REST API to get all the names.
+Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+   #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/names', methods=['GET'])
 def get_names():
-    return jsonify_list([i.to_client() for i in Name.get_all_names()])
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    try:
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        names = system.get_names(session)
+        system.logout(system.get_session_from_email(session_email))
+        return jsonify_list([i.to_client() for i in names])
+    except Exception, e:
+        current_app.logger.error("Error occured while getting names"
+                                     "user record: %s" % str(e))
+        system.logout(system.get_session_from_email(session_email))
+        abort(500, str(e))
+    
 #+END_SRC
-
 
 ** GET all emails
    The is the REST API to get all the roles.
-
+Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+   #+END_EXAMPLE
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/emails', methods=['GET'])
 def get_emails():
-    return jsonify_list([i.to_client() for i in Email.get_all_emails()])
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    try:
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        emails = system.get_emails(session)
+        system.logout(system.get_session_from_email(session_email))
+        return jsonify_list([i.to_client() for i in emails])
+    except Exception, e:
+        current_app.logger.error("Error occured while getting emails"
+                                     "user record: %s" % str(e))
+        system.logout(system.get_session_from_email(session_email))
+        abort(500, str(e))
 #+END_SRC
 
-
 ** GET a user with id
+Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+#+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/users/<int:id>', methods=['GET'])
 def get_user_by_id(id):
-    record = User.get_by_id(id)
-    if not record:
-        abort(404, "No entry for %s with id: %s found." % ("user", id))
-
-    return jsonify(record.to_client())
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    try:
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        user = system.get_user_by_id(session,id)
+        system.logout(system.get_session_from_email(session_email))
+        return jsonify(user.to_client())
+    except Exception, e:
+        current_app.logger.error("Error occured while getting emails"
+                                     "user record: %s" % str(e))
+        system.logout(system.get_session_from_email(session_email))
+        print str(e)
+        abort(500, str(e))
 #+END_SRC
 
-
-
 ** GET a role with id
-   
+   Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+#+END_EXAMPLE
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/roles/<int:id>', methods=['GET'])
 def get_role_by_id(id):
-    record = Role.get_by_id(id)
-    if not record:
-        abort(404, "No entry for %s with id: %s found." % ("role", id))
-
-    return jsonify(record.to_client())
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    try:
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        role = system.get_role_by_id(session,id)
+        system.logout(system.get_session_from_email(session_email))
+        return jsonify(role.to_client())
+    except Exception, e:
+        current_app.logger.error("Error occured while getting emails"
+                                     "user record: %s" % str(e))
+        system.logout(system.get_session_from_email(session_email))
+        print str(e)
+        abort(500, str(e))
 #+END_SRC
 
 ** GET a name with id
-
+Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+#+END_EXAMPLE
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/names/<int:id>', methods=['GET'])
 def get_name_by_id(id):
-    record = Name.get_by_id(id)
-    if not record:
-        abort(404, "No entry for %s with id: %s found." % ("name", id))
-
-    return jsonify(record.to_client())
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    try:
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        name = system.get_name_by_id(session,id)
+        system.logout(system.get_session_from_email(session_email))
+        return jsonify(name.to_client())
+    except Exception, e:
+        current_app.logger.error("Error occured while getting emails"
+                                     "user record: %s" % str(e))
+        system.logout(system.get_session_from_email(session_email))
+        print str(e)
+        abort(500, str(e))
 #+END_SRC
 
 ** GET an email with id
+Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+#+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/emails/<int:id>', methods=['GET'])
 def get_email_by_id(id):
-    record = Email.get_by_id(id)
-    if not record:
-        abort(404, "No entry for %s with id: %s found." % ("email", id))
-
-    return jsonify(record.to_client())
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json:
+        abort(400)
+    try:
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        email = system.get_email_by_id(session,id)
+        system.logout(system.get_session_from_email(session_email))
+        return jsonify(email.to_client())
+    except Exception, e:
+        current_app.logger.error("Error occured while getting emails"
+                                     "user record: %s" % str(e))
+        system.logout(system.get_session_from_email(session_email))
+        print str(e)
+        abort(500, str(e))
 #+END_SRC
 
 ** Create a user
@@ -132,33 +282,32 @@ def get_email_by_id(id):
    "role_id": 1
    "session": "admin@vlabs.com"
    }
-
-    OR
-   
-    {
-    "name": "Jimi hendrix",
-    "email": "jimi@gmail.com",
-    }
    #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
-@api.route('/users', methods=['POST'])
+@api.route('/create_user', methods=['POST'])
 def create_user():
-    if not request.json or not 'name' in request.json or not 'email' in request.json:
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'name' in request.json or not 'email' in request.json or not 'role_id' in request.json or not 'session' in request.json :
         abort(400)
     else:
-        name = request.json['name']
-        email = request.json['email']
-        role_id = request.json['role_id']        
+        name = request.json['name'].encode('ascii','ignore')
+        email = request.json['email'].encode('ascii','ignore')
+        role_id = int(request.json['role_id'].encode('ascii','ignore'))
+        session_email = request.json['session'].encode('ascii','ignore')
         try:
             role = Role.get_by_id(role_id)
-            session_email = Email(request.json['session'])
             session = system.get_session_from_email(session_email)
-            create_app.system.create_user(session,name,email,role)
-            return jsonify(user.to_client())
+            system.create_user(session,name,email,role)
+            system.logout(session)
+            return jsonify(status = 'sucess') 
+            
+            #return jsonify(id= id,status = 'sucess')
         except Exception, e:
             current_app.logger.error("Error occured while inserting"
                                      "user record: %s" % str(e))
+            system.logout(system.get_session_from_email(session_email))
             abort(500, str(e))
 #+END_SRC
 
@@ -173,24 +322,27 @@ def create_user():
    #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
-@api.route('/users<int:id>', methods=['DELETE'])
-def delete_user():
+@api.route('/users/<int:id>', methods=['DELETE'])
+def delete_user(id):
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
     if not request.json or not 'session' in request.json:
         abort(400)
     else:
-        user = User.get_by_id(id)
-        if not user:
-            abort(404, "No entry for %s with id: %s found." % ("user", id))
         try:
-            session_email = Email(request.json['session'])
+            session_email = request.json['session'].encode('ascii','ignore')
             session = system.get_session_from_email(session_email)
-            create_app.system.delete_user(session,user)
+            system.create_user(session,'messi','messi@barca.com',Role.get_by_id(2))
+            user = User.get_by_id(id)
+            system.delete_user(session,user)
+            system.logout(system.get_session_from_email(session_email))
+            return jsonify(id= id,status = 'sucess') 
         except Exception, e:
             current_app.logger.error("Error occured while inserting"
                                      "user record: %s" % str(e))
+            system.logout(system.get_session_from_email(session_email))
             abort(500, str(e))
 #+END_SRC
-
 
 ** Update the role of a user
    Usage:
@@ -203,24 +355,27 @@ def delete_user():
    #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
-@api.route('/users<int:id>', methods=['PUT'])
-def update_role():
-    if not request.json or not 'session' in request.json:
+@api.route('/users_roles/<int:id>', methods=['PUT'])
+def update_role(id):
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
+    if not request.json or not 'session' in request.json :
         abort(400)
     else:
-        user = User.get_by_id(id)
-        if not user:
-            abort(404, "No entry for %s with id: %s found." % ("user", id))
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
         try:
-            session_email = Email(request.json['session'])
-            session = system.get_session_from_email(session_email)
-            create_app.system.update_role(session,user)
+            system.create_user(session,'messi','messi@barca.com',Role.get_by_id(2))
+            user = User.get_by_id(id)
+            user1 = system.update_role(session,user)
+            system.logout(system.get_session_from_email(session_email))
+            return jsonify(user1.to_client())
         except Exception, e:
             current_app.logger.error("Error occured while updating"
                                      "user record: %s" % str(e))
+            system.logout(system.get_session_from_email(session_email))
             abort(500, str(e))
 #+END_SRC
-
 
 ** Update the name of a user
    Usage:
@@ -234,25 +389,27 @@ def update_role():
    #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
-@api.route('/users<int:id>', methods=['PUT'])
-def update_name():
+@api.route('/users_names/<int:id>', methods=['PUT'])
+def update_name(id):
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
     if not request.json or not 'session' in request.json or not 'name' in request.json:
         abort(400)
     else:
         user = User.get_by_id(id)
-        name = request.json(['name'])
-        if not user:
-            abort(404, "No entry for %s with id: %s found." % ("user", id))
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        name = request.json['name'].encode('ascii','ignore')
         try:
-            session_email = Email(request.json['session'])
-            session = system.get_session_from_email(session_email)
-            create_app.system.update_name(session,user,Name(name))
+            user1 = system.update_name(session,user,name)
+            system.logout(system.get_session_from_email(session_email))
+            return jsonify(user1.to_client())
         except Exception, e:
             current_app.logger.error("Error occured while updating"
                                      "user record: %s" % str(e))
+            system.logout(system.get_session_from_email(session_email))
             abort(500, str(e))
 #+END_SRC
-
 
 ** Update the email of a user
    Usage:
@@ -266,26 +423,325 @@ def update_name():
    #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
-@api.route('/users<int:id>', methods=['PUT'])
-def update_email():
+@api.route('/users_emails/<int:id>', methods=['PUT'])
+def update_email(id):
+    system = WebSystem('shashank','shashank@gmail.com')
+    system.login(system.get_user_from_email ('shashank@gmail.com'))
     if not request.json or not 'session' in request.json or not 'email' in request.json:
         abort(400)
     else:
         user = User.get_by_id(id)
-        email = request.json(['email'])
-        if not user:
-            abort(404, "No entry for %s with id: %s found." % ("user", id))
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        email = request.json['email'].encode('ascii','ignore')
         try:
-            session_email = Email(request.json['session'])
-            session = system.get_session_from_email(session_email)
-            create_app.system.update_email(session,user,Email(email))
-            return jsonify(user.to_client())
+            user1 = system.update_email(session,user,email)
+            system.logout(system.get_session_from_email('shashankviswanadha@gmail.com'))
+            return jsonify(user1.to_client())
         except Exception, e:
             current_app.logger.error("Error occured while updating"
                                      "user record: %s" % str(e))
+            system.logout(system.get_session_from_email(session_email))
             abort(500, str(e))
+    
 #+END_SRC
 
 
 
 
+*  Test API
+** Imports for tests
+#+BEGIN_SRC python :tangle ../../tests/test_api.py :eval no
+# -*- coding: utf-8 -*-
+
+import unittest
+from flask.ext.testing import TestCase
+from datetime import datetime
+# import json
+
+from src.db import *
+from src.app import create_app
+from src.op_exceptions import AttributeRequired
+
+config = {
+    'SQLALCHEMY_DATABASE_URI': ''
+}
+
+
+#+END_SRC
+** User Tests
+#+BEGIN_SRC python :tangle ../../tests/test_api.py :eval no
+class TestUser(TestCase):
+
+    TESTING = True
+
+    def create_app(self):
+        app = create_app(config)
+        return app
+
+    def setUp(self):
+        db.create_all()
+        
+
+    def tearDown(self):
+        WebSystem.system_active = False
+        db.session.remove()
+        db.drop_all()
+
+    def test_get_all_users(self):
+        print "test_get_all_users"
+
+        ###Create Users
+        payload = {'session': 'shashank@gmail.com'}
+
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.get("/users",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_all_roles(self):
+        print "test_get_all_roles"
+
+        ###Create Users
+        payload = {'session': 'shashank@gmail.com'}
+
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.get("/roles",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_all_names(self):
+        print "test_get_all_names"
+
+        ###Create Users
+        payload = {'session': 'shashank@gmail.com'}
+
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.get("/names",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_get_all_emails(self):
+        print "test_get_all_emails"
+
+        ###Create Users
+        payload = {'session': 'shashank@gmail.com'}
+
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.get("/emails",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_one_user(self):
+        print "test_get_one_user"
+
+        ### create a User
+        payload = {'session': 'shashank@gmail.com'}
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.get("/users/1",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_get_one_role(self):
+        print "test_get_one_role"
+
+        ### create a User
+        payload = {'session': 'shashank@gmail.com'}
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.get("/roles/1",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_get_one_name(self):
+        print "test_get_one_name"
+
+        ### create a User
+        payload = {'session': 'shashank@gmail.com'}
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.get("/names/1",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_one_email(self):
+        print "test_get_one_email"
+
+        ### create a User
+        payload = {'session': 'shashank@gmail.com'}
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.get("/emails/1",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_user(self):
+        print "test_create_user"
+
+        ### create a User
+        payload = {'session': 'shashank@gmail.com','name':'messi','email':'messi@barca.com',
+                   'role_id':'2','session':'shashank@gmail.com'}
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.post("/create_user",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_user(self):
+        print "test_delete_user"
+
+        ### create a User
+        payload = {'session': 'shashank@gmail.com'}
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.delete("/users/2",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+        
+    def test_update_role(self):
+       print "test_update_role"
+
+       ### create a User
+       payload = {'session': 'shashank@gmail.com'}
+       headers = {'content-type': 'application/json'}
+       response = self.client.put("/users_roles/2",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+       self.assertEqual(response.status_code, 200)
+        
+    def test_update_name(self):
+        print "test_update_name"
+
+        ### create a User
+        payload = {'session': 'shashank@gmail.com','name':'shashankviswanadha'}
+        headers = {'content-type': 'application/json'}
+        response = self.client.put("/users_names/1",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_email(self):
+        print "test_update_email"
+
+        ### create a User
+        payload = {'session': 'shashank@gmail.com','email':'shashankviswanadha@gmail.com'}
+        headers = {'content-type': 'application/json'}
+        response = self.client.put("/users_emails/1",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+        self.assertEqual(response.status_code, 200)
+        
+
+    """def test_update_existing_user(self):
+        # Create a user
+        # update the same user
+        role1 = Role(name=Name("admin"))
+        role1.save()
+        role2 = Role(name=Name("user"))
+        role2.save()
+
+        user1 = User(name=Name("admin user"),
+                     email=Email("admin@xyz.com"),
+                     role=role1)
+
+        user1.save()
+        user2 = User(name=Name("normal user"),
+                     email=Email("normal@xyz.com"),
+                     role=role2)
+
+        user2.save()
+
+        payload = {'email': 'ttt@kkk.com',
+                   'name': 'nearly normal user',
+                   'role_id': 2,
+                   'session': 't@g.com'}
+        headers = {'content-type': 'application/json'}
+        response = self.client.put("/users/2",
+                                   data=json.dumps(payload),
+                                   headers=headers)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_new_user(self):
+        print "test_create_new_user"
+        role1 = Role(name=Name("admin"))
+        role1.save()
+        role2 = Role(name=Name("user"))
+        role2.save()
+
+        user1 = User(name=Name("admin user"),
+                     email=Email("admin@xyz.com"),
+                     role=role1)
+
+        user1.save()
+        user2 = User(name=Name("normal user"),
+                     email=Email("normal@xyz.com"),
+                     role=role2)
+
+        user2.save()
+
+        payload = {'email': 'ttt@kkk.com',
+                   'name': 'nearly normal user',
+                   'role_id': 2,
+                   'session': 't@g.com'}
+
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.post("/users",
+                                    data=json.dumps(payload),
+                                    headers=headers)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_user(self):
+        print "test_delete_user"
+        role1 = Role(name=Name("admin"))
+        role1.save()
+        role2 = Role(name=Name("user"))
+        role2.save()
+
+        user1 = User(name=Name("admin user"),
+                     email=Email("admin@xyz.com"),
+                     role=role1)
+
+        user1.save()
+        user2 = User(name=Name("normal user"),
+                     email=Email("normal@xyz.com"),
+                     role=role2)
+
+        user2.save()
+
+        payload = {'session': 't@g.com'}
+
+        headers = {'content-type': 'application/json'}
+
+        response = self.client.delete("/users/2",
+                                      data=json.dumps(payload),
+                                      headers=headers)
+
+        self.assertEqual(response.status_code, 200)"""
+
+#+END_SRC 
+
+
+** Run Tests
+#+BEGIN_SRC python :tangle ../../tests/test_api.py :eval no
+
+if __name__ == '__main__':
+    unittest.main()
+#+END_SRC 

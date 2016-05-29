@@ -11,7 +11,7 @@
 * Introduction
   This document will illustrate installation of all the dependencies required
   for setting up the application.
-
+  
 * Install dependendent python packages
   Here we use the =setuptools= module from the standard lib, to make a
   =setup.py= file, which will install all the python library dependencies.
@@ -43,25 +43,20 @@ from src.app import create_app
 from src.db import *
 import src.config as config
 
-
 def create_roles():
-    role1 = Role(name=Name("admin"))
-    role1.save()
+    role_admin = Role("admin")
+    role_admin.save()
 
-    role2 = Role(name=Name("user"))
-    role2.save()
+    role_user = Role("user")
+    role_user.save()
 
 def create_admin_user():
-    user = User(name=Name("Admin User"),
-                email=Email("xyz@gmail.com"),
-                role=Role.get_by_id(1))
-    user.save()
+    WebSystem('shashank','shashank@gmail.com')
 
 if __name__ == "__main__":
     db.create_all(app=create_app(config))
     create_roles()
     create_admin_user()
-
 #+END_SRC
 
 * Install all dependencies and setup the software

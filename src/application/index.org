@@ -37,9 +37,9 @@ print "test package"
 # example DB URI:
 # mysql+oursql://scott:tiger@localhost/mydatabase
 # postgresql+psycopg2://scott:tiger@localhost/mydatabase
-SQLALCHEMY_DATABASE_URI = 'mysql+oursql://<userid>:<password>@<servername>/<db_name>'
+SQLALCHEMY_DATABASE_URI = 'mysql+oursql://root:root@localhost/webapp'
 # example
-#SQLALCHEMY_DATABASE_URI = 'mysql+oursql://root:mysql@localhost/userdirectory'
+#SQLALCHEMY_DATABASE_URI = 'mysql+oursql://root:mysql@localhost/webapp'
 
 # Debug from SQLAlchemy
 # Turn this to False on production
@@ -86,7 +86,7 @@ import config
 from config import LOG_FILE_DIRECTORY
 from config import LOG_FILE
 from config import LOG_LEVEL
-
+from db import *
 
 def create_app(config):
     # init our app
@@ -94,7 +94,7 @@ def create_app(config):
     app.secret_key = 'djfjsdkjXXS7979dfdfd'
     # load config values from the config file
     app.config.from_object(config)
-
+    
     # init sqlalchemy db instance
     db.init_app(app)
     db.app = app

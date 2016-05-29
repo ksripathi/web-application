@@ -1,0 +1,43 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/shashank/projects/webapp/web-application/src/implementation/persistence/index.org
+
+
+* update_name
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2016-05-27 Fri 13:01
+  :ARCHIVE_FILE: ~/projects/webapp/web-application/src/implementation/persistence/index.org
+  :ARCHIVE_OLPATH: Object Relational Model/WebSystem/Functions
+  :ARCHIVE_CATEGORY: index
+  :END:
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def update_name(self,session,user,name):
+        if session.usr.role.value == 'admin' :
+            if isinstance (user,User) and user in self.users :
+                old_name = user.name
+                name.save()
+                user.set_name(name)
+                user.save()
+                if old_name.users == []:
+                    old_name.delete()
+                self.users = User.get_all()
+                return user
+            else:
+                raise TypeError('Invalid Email Type')
+        elif session.usr.role.value == 'user' :
+            if isinstance (user,User) and user in self.users and user == session.usr:
+                old_name = user.name
+                user.set_name(name)
+                name.save()
+                user.save()
+                if old_name.users == []:
+                    old_name.delete()
+                self.users = User.get_all()
+                return user
+            else:
+                raise NotAuthorizedError('Only an admin can change the names of other users')
+        else:
+            raise TypeError('Invalid role type')
+#+END_SRC
+
