@@ -816,20 +816,12 @@ class WebSystem():
    #+END_EXAMPLE
 
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
-    def __init__(self,name,email):
-            if not WebSystem.system_active :
-                na = Name(name)
-                em = Email(email)
-                role_admin = Role('admin')
-                role_user = Role('user')
-                role_admin.save()
-                role_user.save()
-                na.save()
-                em.save()
-                Us = User(na,em,Role.get_by_id(1))
-                Us.save()
-                WebSystem.system_active = True
-	        self.users = User.get_all()
+    def __init__(self):
+        if WebSystem.system_active == False:
+            WebSystem.system_active = True
+	    #self.users = User.get_all()
+        else:
+            self.users = User.get_all()
             
         
 #+END_SRC
@@ -1116,11 +1108,11 @@ class WebSystem_test(TestCase):
         system.create_user(sess,'srivalya','srivalya@gmail.com',Role.get_by_id(2))
         system.create_user(sess,'barca','barca@barca.com',Role.get_by_id(2))
         system.create_user(sess,'srivalya','sri@mail.com',Role.get_by_id(2))
-        system.update_name(sess,system.get_user_from_email('srivalya@gmail.com'),Name('sri'))
+        system.update_name(sess,system.get_user_from_email('srivalya@gmail.com'),'sri')
         self.assertTrue(system.get_user_from_email('srivalya@gmail.com').name.value == 'sri')
         sess1 = system.login(system.get_user_from_email('barca@barca.com'))
-        self.assertRaises(NotAuthorizedError,system.update_name,sess1,system.get_user_from_email('shashank@gmail.com'),Name('SV'))
-        system.update_name(sess1,system.get_user_from_email('barca@barca.com'),Name('barcelona'))
+        self.assertRaises(NotAuthorizedError,system.update_name,sess1,system.get_user_from_email('shashank@gmail.com'),'SV')
+        system.update_name(sess1,system.get_user_from_email('barca@barca.com'),'barcelona')
         self.assertTrue(system.get_user_from_email('barca@barca.com').name.value == 'barcelona')
         system.logout(sess)
         system.logout(sess1)
@@ -1163,11 +1155,11 @@ class WebSystem_test(TestCase):
         sess = system.login(system.get_user_from_email('shashank@gmail.com'))
         system.create_user(sess,'srivalya','srivalya@gmail.com',Role.get_by_id(2))
         system.create_user(sess,'barca','barca@barca.com',Role.get_by_id(2))
-        system.update_email(sess,system.get_user_from_email('srivalya@gmail.com'),Email('srivalya12@gmail.com'))
+        system.update_email(sess,system.get_user_from_email('srivalya@gmail.com'),'srivalya12@gmail.com')
         self.assertTrue(system.get_user_from_email('srivalya12@gmail.com').email.value == 'srivalya12@gmail.com')
         sess1 = system.login(system.get_user_from_email('barca@barca.com'))
-        self.assertRaises(NotAuthorizedError,system.update_email,sess1,system.get_user_from_email('shashank@gmail.com'),Email('shashankviswanadha@gmail.com'))
-        system.update_email(sess1,system.get_user_from_email('barca@barca.com'),Email('barcelona@barca.com'))
+        self.assertRaises(NotAuthorizedError,system.update_email,sess1,system.get_user_from_email('shashank@gmail.com'),'shashankviswanadha@gmail.com')
+        system.update_email(sess1,system.get_user_from_email('barca@barca.com'),'barcelona@barca.com')
         self.assertTrue(system.get_user_from_email('barcelona@barca.com').email.value == 'barcelona@barca.com')
         system.logout(sess)
         system.logout(sess1)
@@ -1335,6 +1327,7 @@ class WebSystem_test(TestCase):
 **** get_session_from_email
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_session_from_email(self,email):
+        self.users = User.get_all()
         us = self.get_user_from_email(email)
         if us != False:
             return self.get_session_from_user(us)
@@ -1450,7 +1443,14 @@ def setUp():
     role_user = Role('user')
     role_admin.save()
     role_user.save()
-    system = WebSystem('shashank','shashank@gmail.com')
+    na = Name('shashank')
+    em = Email('shashank@gmail.com')
+    na.save()
+    em.save()
+    us = User(na,em,Role.get_by_id(1))
+    us.save()
+    system = WebSystem()
+    system.users = User.get_all()
     return system
 
 def tearDown(system):

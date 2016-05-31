@@ -42,21 +42,23 @@ setup(
 from src.app import create_app
 from src.db import *
 import src.config as config
-
-def create_roles():
-    role_admin = Role("admin")
-    role_admin.save()
-
-    role_user = Role("user")
-    role_user.save()
-
+from src.api import global_system
 def create_admin_user():
-    WebSystem('shashank','shashank@gmail.com')
-
+    na = Name('shashank')
+    em = Email('shashank@gmail.com')
+    role_admin = Role('admin')
+    role_user = Role('user')
+    role_admin.save()
+    role_user.save()
+    na.save()
+    em.save()
+    Us = User(na,em,Role.get_by_id(1))
+    Us.save()
+    
 if __name__ == "__main__":
     db.create_all(app=create_app(config))
-    create_roles()
     create_admin_user()
+    
 #+END_SRC
 
 * Install all dependencies and setup the software
