@@ -82,6 +82,7 @@ TYPE Email
 TYPE Name
 TYPE Role = {admin, user}
 TYPE Session
+TYPE System
 #+END_SRC
 
 * Relations and cardinality constraints over entity types 
