@@ -248,7 +248,6 @@ class TestUser(TestCase):
             raise TypeError('Invalid object type for email')
 #+END_SRC
 
-***** Test
 
 **** setName
 ***** Implementation
@@ -259,7 +258,6 @@ class TestUser(TestCase):
         else:
             raise TypeError('Invalid object type for name')
 #+END_SRC
-***** Test
 
 **** setRole
 ***** Implementation
@@ -271,7 +269,6 @@ class TestUser(TestCase):
             raise TypeError('Invalid object type for role')
 
 #+END_SRC
-***** Test
 
 **** getRole
 ***** Implementation
@@ -279,15 +276,12 @@ class TestUser(TestCase):
     def get_role(self):
         return self.role
 #+END_SRC
-***** Test
-
 
 **** getEmail
  #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def get_email(self):
         return self.email
  #+END_SRC
-
 
 **** getName
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
@@ -311,21 +305,23 @@ class TestUser(TestCase):
 ** Role
 
 *** Introduction
-   A Role has got certain privileges.  In this current application, the
-   privileges are understood 
+   A Role has got certain privileges.
    
    Different types of roles are:
-   - Admin :: An admin is an user who can add, modify and delete other users
-        except himself.
+   - Admin :: An admin is an user who can add and modify users and delete the
+               users who are not in session.    
+              An Admin can delete another admin who is not in session.
+              An Admin cannot delete himself because he is in session.
+              
    - User :: A User is a user who can view all other users and can modify himself.
-
-
+              
+ 
 *** Mutable Data
 
      These are the data associated with Role type, which are mutable
 
-     + Name
-
+     + value
+        Of string type and can contain values admin or user. 
 
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
@@ -417,16 +413,13 @@ Role.user = Role('user')
 ** Session
 
 *** Introduction
-   A session is the class that performs all the operations on the system.
-
-   - User :: A User object is associated with each session object.
-
-
+     Every user gets associated with a session on logging in.
+   
 *** Mutable Data
 
-     These are the data associated with Session type, which are mutable
-
-
+     The data associated with Session type, which are mutable
+     
+     - User :: A User object is associated with each session object.
 
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
@@ -449,11 +442,6 @@ class Session():
         self.usr = user
 #+END_SRC
 
-*** Test Constructor
-#+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
-
-#+END_SRC
-
 
 *** Functions
 
@@ -472,6 +460,7 @@ class Session():
             raise TypeError('Invalid User type')
 #+END_SRC
 
+
 ** WebSystem
 
 *** Introduction
@@ -479,11 +468,17 @@ class Session():
 
    - User :: A User object is associated with each session object.
 
-
 *** Mutable Data
 
      These are the data associated with WebSystem type, which are mutable
-
+     
+     + users[] 
+        List of registered users.
+     + sessions[]
+        List of sessions the logged in users are associated with.
+     + system_active
+        A boolean variable which is assigned true when the system is active
+        and false when the system is not active.
 
 
 *** Definition
@@ -495,7 +490,6 @@ class WebSystem():
     system_active = False
 
 #+END_SRC
-
 
 *** Constructor
 
