@@ -222,9 +222,22 @@ def str_to_bool(s):
   
 ** Name
 
-*** Construction
+*** Table for name objects 
+    
+     Name of table:- 'Name'
 
-     Name is an alphabetical string.
+       |----+-------|
+       | id | value |
+       |----+-------|
+       |    |       |
+       |----+-------|
+     
+      + Column 'id' is of integer type and is the primary key of the table.
+      + Column 'value' is of type string,it need not be unique and this field 
+         can never be empty.    
+      + The user's table back refers to this table. 
+  
+*** Construction
 
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
 class Name(Entity):
@@ -286,6 +299,21 @@ class TestName(TestCase):
 
 ** Email
 
+*** Table for email objects 
+    
+     Name of table:- 'Email'
+
+       |----+-------|
+       | id | value |
+       |----+-------|
+       |    |       |
+       |----+-------|
+     
+      + Column 'id' is of integer type and is the primary key of the table.
+      + Column 'value' is of type string,it should be unique and this field 
+         can never be empty.    
+      + The user's table back refers to this table. 
+  
 *** Construction
 
      Email is a type as defined in RFC [[https://tools.ietf.org/html/rfc5321][5321]], [[https://tools.ietf.org/html/rfc5322][5322]] and [[https://tools.ietf.org/html/rfc6531][6531]].
@@ -359,6 +387,21 @@ class TestEmail(TestCase):
      + Email
      + Role
 
+*** Table for email objects 
+    
+     Name of table:- 'User'
+
+       |----+---------+---------+----------|
+       | id | role_id | name_id | email_id |   
+       |----+---------+---------+----------|
+       |    |         |         |          |   
+       |----+---------+---------+----------|
+      
+     
+      + Column 'id' is of integer type and is the primary key of the table.
+      + Column 'role_id' is of type integer and is the foreign key
+      + The user's table back refers to this table. 
+  
 
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
