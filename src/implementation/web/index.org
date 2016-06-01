@@ -8,8 +8,8 @@
 #+LATEX: Literal LaTeX code for export
 
 * Introduction
-This document discribes how to implement a simple web application
-using AngularJS MVC framework.
+  This document discribes how to implement a simple web application
+  using AngularJS MVC framework.
 * What we have so far ????
    - Requirements
    - Data Model
@@ -57,6 +57,7 @@ developers can work on the view, the controller logic, and the
 business logic in parallel.
 
 * Why MVC ??
+
 * How to implement ??
 ** Source Code
 *** Initiating Angular application on html page
@@ -76,6 +77,18 @@ app.config(function($routeProvider){
     .when('/', {
       templateUrl : '/static/partials/users.html',
       controller  : 'users'
+    })
+    .when('/view-user/:id', {
+      templateUrl : '/static/partials/view-user.html',
+      controller  : 'view-user'
+    })
+    .when('/add-user', {
+      templateUrl : '/static/partials/add-user.html',
+      controller  : 'add-user'
+    })
+    .when('/edit-user/:id', {
+      templateUrl : '/static/partials/edit-user.html',
+      controller  : 'edit-user'
     });
 });
 
@@ -86,11 +99,87 @@ app.config(function($routeProvider){
 var app = angular.module('directoryApp.controllers',[]);
 app.controller("users", function($scope,  $http, $routeParams, $route,$window){
     $scope.role_name = $window.role_name;
-    $http.get("http://localhost:5000/users").success(function(response){
+    $http.get("http://localhost:5000/users", {headers: {'session' : $window.session_email}}).success(function(response){
 	$scope.users = response;
     });
-
 });
+
+app.controller("view-user", function($scope,  $http, $routeParams, $route,$window){
+    $scope.role_name = $window.role_name;
+    $http.get("http://localhost:5000/users/" + $routeParams.id, {headers: {'session' : $window.session_email}}).success(function(response){
+	$scope.user = response;
+    });
+    $scope.delete_user = function(id){
+    $http.delete("http://localhost:5000/users/" + $routeParams.id, {headers: {'session' : $window.session_email}}).success(function(response){
+	window.location = "/";
+    }).error(function(resp,code){if (code == 500){alert("You are not authorized to perform this operation");}});
+    }
+    
+});
+
+app.controller("add-user", function($scope,   $http,  $routeParams,  $route,$window){
+    $scope.role_name=$window.role_name;
+    $scope.session_email=$window.session_email;
+    $scope.myText="you haven't clicked submit yet";
+    $scope.add_user=function(){
+       
+       var data={
+            name:$scope.name,
+            email:$scope.email,
+            role_id:$scope.role_id,
+            session: $scope.session_email
+            };
+            console.log((data))
+            console.log(typeof data)
+            
+            $http.post("http://localhost:5000/create_user",data).success(function(reponse){
+            $scope.PostDataResponse=data;
+            $scope.myText="You added successfully"
+            history.back();
+            }).error(function(response) {
+            $scope.ResponseDetails ="Data:" +data+
+            "<hr />status: " + status +
+            "<hr />headers: " + header +
+            "<hr />config: " + config;
+            });
+
+            };
+});
+
+app.controller("edit-user", function($scope,   $http,  $routeParams,  $route,$window){
+    $scope.role_name=$window.role_name;
+    $scope.session_email=$window.session_email;
+    $scope.myText="you haven't clicked submit yet"
+    $scope.edit_user=function(){
+       
+       var data={
+            name:$scope.name,
+            email:$scope.email,
+            role_id:$scope.role_id,
+            session: $scope.session_email
+            };
+            console.log((data))
+            console.log(typeof data)
+            
+            $http.put("http://localhost:5000/edit_users/" + $routeParams.id ,data).success(function(reponse){
+            $scope.PostDataResponse=data;
+            $scope.myText="You edited successfully";
+            $http.get("http://localhost:5000/auth/logout")
+            window.location = "/";
+            }).error(function(response) {
+            $scope.ResponseDetails ="Data:" +data+
+            "<hr />status: " + status +
+            "<hr />headers: " + header +
+            "<hr />config: " + config;
+            alert("Unable to edit user.");
+            });
+
+            };
+
+    
+});
+
+
 #+END_SRC
 *** View
 - =users.html=
@@ -117,7 +206,7 @@ app.controller("users", function($scope,  $http, $routeParams, $route,$window){
 	  <tr ng-repeat="user in users">
 	    <td>{{ $index+1 }}</td>
             <td>{{ user.name }}</td>
-	    <td>{{ user.role['name'] }}</td>
+	    <td>{{ user.role }}</td>
             <td><a href="#/view-user/{{user.id}}" class="btn btn-primary">View</a></td>
 	  </tr>
         </tbody>

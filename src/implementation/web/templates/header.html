@@ -38,6 +38,7 @@
       {% if session.email %}
       var user_id  = '{{ session.user_id }}';
       var role_name = '{{ session.role_name }}';
+      var session_email = '{{ session.email }}';
       {% else %}
       {% endif %}
     </script>
