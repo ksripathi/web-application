@@ -893,7 +893,7 @@ class WebSystem_test(TestCase):
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def admin_check(self,user):
         for us in self.users:
-            if us != user:
+            if us.email.value != user.email.value:
                 if us.role == Role.get_by_id(1):
                     return True
         return False
@@ -907,7 +907,7 @@ class WebSystem_test(TestCase):
         if isinstance(user,User) and user in self.users:
             flag = 0
             for sess in self.sessions:
-                if sess.get_user() == user:
+                if sess.get_user().email.value == user.email.value:
                     flag = 1
                     break
             if flag == 0:
@@ -1015,12 +1015,12 @@ class WebSystem_test(TestCase):
         if session.usr.role.value == 'admin':
             if isinstance (user,User) and user in self.users:
                 for sess in self.sessions:
-                    if sess.usr == user:
+                    if sess.usr.email.value == user.email.value:
                         raise NotAuthorizedError('user in session') 
-		na = user.name.value
-		em = user.email.value            
+		na = user.name
+		em = user.email            
                 user.delete()
-		Email.query.filter_by (value = em).delete
+		em.delete()
 		del_name = Name.query.filter_by (value = na)
 		if del_name == []:
 		    del_name.delete()
@@ -1061,15 +1061,15 @@ class WebSystem_test(TestCase):
 **** update_role
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def update_role(self,session,user):
-        if session.usr.role == Role.get_by_id(1):
+        if session.usr.role.value == 'admin':
             if isinstance (user,User) and user in self.users:
-                if user.role == Role.get_by_id(2):
+                if user.role.value == 'user':
                     user.set_role(Role.get_by_id(1))
                     user.save()
                     self.users = User.get_all()
                     return user
-                elif user.role == Role.get_by_id(1): 
-                    if user == session.usr and self.admin_check(user) == True:
+                elif user.role.value == 'admin': 
+                    if user.email.value == session.usr.email.value and self.admin_check(user) == True:
                         user.set_role(Role.get_by_id(2))
                         user.save()
                         self.users = User.get_all()
@@ -1126,7 +1126,7 @@ class WebSystem_test(TestCase):
             else:
                 raise TypeError('Invalid Email Type')
         elif session.usr.role.value == 'user' :
-            if isinstance (user,User) and user in self.users and user == session.usr:
+            if isinstance (user,User) and user in self.users and user.name.value == session.usr.name.value:
                 old_name = user.name
                 na = Name(name)
                 na.save()
@@ -1166,22 +1166,26 @@ class WebSystem_test(TestCase):
 **** update_email
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def update_email(self,session,user,email):
-            if session.usr.role == Role.get_by_id(1) :
+            if session.usr.role.value == 'admin' :
                 if isinstance (user,User) and user in self.users :
                     em = Email(email)
                     em.save()
+                    old_email = user.email
                     user.set_email(em)
                     user.save()
+                    old_email.delete()
                     self.users = User.get_all()
                     return user
                 else:
                     raise TypeError('Invalid User type')          
-            elif session.usr.role == Role.get_by_id(2) :
-                if isinstance (user,User) and user in self.users and user == session.usr:
+            elif session.usr.role == 'user' :
+                if isinstance (user,User) and user in self.users and user.email.value == session.usr.email.value:
                     em = Email(email)
                     em.save()
+                    old_email = user.email
                     user.set_email(em)
                     user.save()
+                    old_email.delete()
                     self.users = User.get_all()
                     return user
                 else:
@@ -1349,6 +1353,7 @@ class WebSystem_test(TestCase):
 **** get_user_from_email
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_user_from_email(self,email):
+        self.users = User.get_all()
         for user in self.users:
             if user.get_email().value == email:
                 return user
@@ -1360,7 +1365,7 @@ class WebSystem_test(TestCase):
     def get_session_from_user(self,user):
         if isinstance(user,User):
             for sess in self.sessions:
-                if sess.usr == user:
+                if sess.usr.email.value == user.email.value:
                     return sess
             raise ConstraintError("User not in session")
         else:

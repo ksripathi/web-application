@@ -21,6 +21,15 @@
 	</span>
       </p>
       <p>
+      <p>Role_id:<br>
+	<input type="number" name="role_id" ng-pattern="/^1|2$/" class="form-control"  ng-model="role_id" required>
+	<span style="color:red" ng-show="myForm.role_id.$dirty && myForm.role_id.$invalid">
+	  <span ng-show="myForm.role_id.$error.required">Role_id is required.</span>
+	  <span ng-show="myForm.role_id.$error.pattern">Enter valid Role-id</span>
+	</span>
+      </p>
+      <p>
+
 	<input type="submit" value="Save" class="btn btn-primary"  ng-disabled="myForm.$invalid">
 	<a href="#/">Cancel</a>
       </p>

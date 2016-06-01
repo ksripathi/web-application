@@ -34,9 +34,8 @@ system = WebSystem()
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route("/", methods=['GET'])
 def index():
+    global system
     if request.method == 'GET':
-        system = WebSystem()
-        print User.get_by_id(1)
         if ('email' in session):
             return render_template("user-list.html")
         else:
@@ -51,17 +50,21 @@ def login():
         email = str(request.form['email'])
         usr = system.get_user_from_email(email)
         system.login(usr)
+        current_app.logger.info("Successfully Logged in")
+        #session['role_name'] = str(user_list[usr]['role']['name'])
+        session['email'] = email
+        session['role_name'] = usr.role.value
+        return redirect("/")
     except Exception, e:
-        current_app.logger.error("Error occured while getting users"
-                                     "user record: %s" % str(e))
-        print str(e)                                     
-        abort(500, str(e))
-
+        return render_template("login.html", message = str(e))
+    
 #+END_SRC
 ** logout
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
 @api.route('/auth/logout', methods=['GET'])
 def logout_handler():
+    global system
+    system.logout(system.get_session_from_email(session['email']))
     session.pop('email', None)
     session.pop('role_name', None)
     return redirect("/")
@@ -78,13 +81,16 @@ Usage:
 @api.route('/users', methods=['GET'])
 def get_users():
     global system
-    if not request.json or not 'session' in request.json:
+    #print request.json
+    session_email = request.headers.get('session')
+    if session_email == None:
         abort(400)
     try:
-        session_email = request.json['session'].encode('ascii','ignore')
         session = system.get_session_from_email(session_email)
-        users = system.get_users(session)        
+        users = system.get_users(session)
+        print jsonify_list([i.to_client() for i in users])
         return jsonify_list([i.to_client() for i in users])
+        
     except Exception, e:
         current_app.logger.error("Error occured while getting users"
                                      "user record: %s" % str(e))
@@ -188,10 +194,10 @@ Usage:
 @api.route('/users/<int:id>', methods=['GET'])
 def get_user_by_id(id):
     global system
-    if not request.json or not 'session' in request.json:
+    session_email = request.headers.get('session')
+    if not session_email:
         abort(400)
     try:
-        session_email = request.json['session'].encode('ascii','ignore')
         session = system.get_session_from_email(session_email)
         user = system.get_user_by_id(session,id)
         return jsonify(user.to_client())
@@ -297,12 +303,13 @@ def get_email_by_id(id):
 @api.route('/create_user', methods=['POST'])
 def create_user():
     global system
+    print request.json
     if not request.json or not 'name' in request.json or not 'email' in request.json or not 'role_id' in request.json or not 'session' in request.json :
         abort(400)
     else:
         name = request.json['name'].encode('ascii','ignore')
         email = request.json['email'].encode('ascii','ignore')
-        role_id = int(request.json['role_id'].encode('ascii','ignore'))
+        role_id = request.json['role_id']
         session_email = request.json['session'].encode('ascii','ignore')
         try:
             role = Role.get_by_id(role_id)
@@ -331,11 +338,11 @@ def create_user():
 @api.route('/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
     global system
-    if not request.json or not 'session' in request.json:
+    session_email = request.headers.get('session')
+    if session_email == None:
         abort(400)
     else:
         try:
-            session_email = request.json['session'].encode('ascii','ignore')
             session = system.get_session_from_email(session_email)
             user = User.get_by_id(id)
             system.delete_user(session,user)
@@ -440,6 +447,41 @@ def update_email(id):
 #+END_SRC
 
 
+
+** Update user
+Usage:
+   #+BEGIN_EXAMPLE
+   GET request
+   {
+   "session": "admin@vlabs.com"
+   }
+   #+END_EXAMPLE
+#+BEGIN_SRC python :tangle ../../src/api.py :eval no
+@api.route('/edit_users/<int:id>', methods=['PUT'])
+def edit_user(id):
+    global system
+    if ((not 'session' in request.json) or (not 'name' in request.json and not 'email' in request.json and not 'role_id' in request.json)):
+        abort(400)
+    try:
+        user = User.get_by_id(id)
+        session_email = request.json['session'].encode('ascii','ignore')
+        session = system.get_session_from_email(session_email)
+        if request.json['name'] != None:
+            name = request.json['name'].encode('ascii','ignore')
+            user1 = system.update_name(session,user,name)
+        if request.json['role_id'] != None:
+            user1 = system.update_role(session,user1)    
+        if request.json['email'] != None:
+            email = request.json['email'].encode('ascii','ignore')
+            user1 = system.update_email(session,user1,email)
+        return jsonify(user1.to_client())
+    except Exception, e:
+        current_app.logger.error("Error occured while getting emails"
+                                     "user record: %s" % str(e))
+        print str(e)
+        abort(500, str(e))
+
+#+END_SRC
 
 
 *  Test API

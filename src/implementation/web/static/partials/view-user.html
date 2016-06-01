@@ -18,19 +18,19 @@
 	</thead>
 	<tbody>
 	  <tr>
-            <td>{{ name }}</td>
-	    <td>{{ email }}</td>
-	    <td>{{ role }}</td>
+            <td>{{ user.name }}</td>
+	    <td>{{ user.email }}</td>
+	    <td>{{ user.role }}</td>
           </tr>
 	  
       </tbody>
       </table>
       <div class="col-md-12">
 	<div class="col-md-4"></div>
-	<span ng-if="role_name == 'admin' || user_id == id">
-          <a href="#/edit-user/{{id}}" class="btn btn-primary">Edit</a>
-	  <span ng-if="role_name == 'admin' &&  user_id != id">
-	    <a class="btn btn-primary" ng-click="delete_user(id)">Delete</a>
+	<span ng-if="role_name == 'admin' || user_id == user.id">
+          <a href="#/edit-user/{{user.id}}" class="btn btn-primary">Edit</a>
+	  <span ng-if="role_name == 'admin' &&  user_id != user.id">
+	    <a class="btn btn-primary" ng-click="delete_user(user.id)">Delete</a>
 	  </span>
 	</span>
 	
