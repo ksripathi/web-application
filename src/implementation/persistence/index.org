@@ -387,7 +387,7 @@ class TestEmail(TestCase):
      + Email
      + Role
 
-*** Table for email objects 
+*** Table for user objects 
     
      Name of table:- 'User'
 
@@ -399,9 +399,9 @@ class TestEmail(TestCase):
       
      
       + Column 'id' is of integer type and is the primary key of the table.
-      + Column 'role_id' is of type integer and is the foreign key
-      + The user's table back refers to this table. 
-  
+      + Column 'role_id' is of type integer 
+      + Column 'name_id' is of type integer
+      + Column 'email_id' is of type integer  
 
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -483,7 +483,6 @@ class TestUser(TestCase):
         self.assertEqual(Email.get_by_id(2).value,'shashankviswanadha@gmail.com')
         tearDown(system)
 #+END_SRC
-
 
 **** setName
 ***** Implementation
@@ -654,14 +653,29 @@ class TestUser(TestCase):
      This is the data associated with Institute type, which is immutable.
 
      + Id
-
-
+     + roles[] :- Is a list containing 2 strings 'admin' and 'user'
+        
 *** Mutable Data
 
      These are the data associated with User type, which are mutable
 
-     + Name
+     + value
 
+*** Table for user objects 
+    
+     Name of table:- 'User'
+
+       |----+-------|
+       | id | value |
+       |----+-------|
+       |    |       |
+       |----+-------|
+      
+     
+      + Column 'id' is of integer type and is the primary key of the table.
+      + Column 'value' is of type string  
+      + The table user back refers to this table to populate its field role_id.
+    
 
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -778,9 +792,8 @@ class TestRole(TestCase):
 
 *** Mutable Data
 
-     These are the data associated with Session type, which are mutable
-
-
+     The data associated with Session type, which are mutable
+     + usr :- A user object
 
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -837,8 +850,8 @@ class Session():
 *** Mutable Data
 
      These are the data associated with WebSystem type, which are mutable
-
-
+     + users[] :- List of registered users. 
+     + sessions[] :-List of sessions of the logged in users. 
 
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -922,7 +935,10 @@ class WebSystem_test(TestCase):
 #+END_SRC
 
 ****  test_login
-
+       Tests :
+       - Raises constraint error when already a logged user tries to login.
+       - Raises Type error for an invalid user login
+  
 #+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
 
     def test_login(self):
@@ -951,6 +967,9 @@ class WebSystem_test(TestCase):
 #+END_SRC
 
 ****  test_logout
+       
+      Tests :
+      - The lengths of the session set should decrease by 1 after a logout.
 
 #+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
 
@@ -968,6 +987,7 @@ class WebSystem_test(TestCase):
         
                
 #+END_SRC
+
 
 **** create_user
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -989,7 +1009,10 @@ class WebSystem_test(TestCase):
 #+END_SRC
 
 ****  test_create_user
-
+       Tests :
+       - A NotAuthorisedError is raised when a user tries to add another user.
+       - A ConstraintError is raised while creating a user with an already
+         existing email. 
 #+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
     def test_create_user(self):
         print 'create user test'
@@ -1008,6 +1031,7 @@ class WebSystem_test(TestCase):
         
         
 #+END_SRC
+
 
 **** delete_user
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -1033,7 +1057,10 @@ class WebSystem_test(TestCase):
 #+END_SRC
 
 **** test_delete_user
-
+      Tests:
+      - NotAuthorizedError is raised when a user tries to delete and when an
+        admin tries to delete a user in session.
+      
 #+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
     def test_delete_user(self):
         print 'delete user test'
@@ -1057,6 +1084,7 @@ class WebSystem_test(TestCase):
         tearDown(system)
         
 #+END_SRC
+
 
 **** update_role
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -1108,6 +1136,7 @@ class WebSystem_test(TestCase):
         tearDown(system)
         
 #+END_SRC
+
 
 **** update name
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -1163,6 +1192,7 @@ class WebSystem_test(TestCase):
         
 #+END_SRC
 
+
 **** update_email
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def update_email(self,session,user,email):
@@ -1213,6 +1243,7 @@ class WebSystem_test(TestCase):
         tearDown(system)
 
 #+END_SRC
+
 
 **** search_users
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -1273,6 +1304,7 @@ class WebSystem_test(TestCase):
         
 
 #+END_SRC
+
 **** get_users
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_users(self,session):
@@ -1297,6 +1329,7 @@ class WebSystem_test(TestCase):
         tearDown(system)
 
 #+END_SRC
+
 
 **** get_roles
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
@@ -1325,6 +1358,7 @@ class WebSystem_test(TestCase):
             raise TypeError('Invalid session')
 #+END_SRC
 
+
 **** get_sessions
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_sessions(self):
@@ -1350,6 +1384,7 @@ class WebSystem_test(TestCase):
 
 #+END_SRC
         
+
 **** get_user_from_email
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_user_from_email(self,email):
@@ -1451,7 +1486,6 @@ class WebSystem_test(TestCase):
 #+END_SRC
 
         
-
 **** get_name_by_id
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def get_name_by_id(self,session,ide):

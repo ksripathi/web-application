@@ -20,18 +20,18 @@
 * What is MVC framework
 
   + The Model-View-Controller (MVC) is an architectural pattern that
-    separates an application into three main logical components
-   - The model
-   - The view and
-   - The controller. 
-
+    separates an application into three main distinct components
+   - The model : Representation of domain data.(persistence mechanism) 
+   - The view  : The user interface
+   - The controller : Intermediate between model and the view.
+                      
   + Each of these components are built to handle specific development
     aspects of an application.
-
+ 
   + MVC is one of the most frequently used industry-standard web
     development framework to create scalable and extensible projects.
 
-  + Diagrame
+  + Diagram
     #+CAPTION:  Git local VCS
     #+LABEL:  Git local VCS
   [[./mvc.jpg]]
@@ -57,6 +57,16 @@ developers can work on the view, the controller logic, and the
 business logic in parallel.
 
 * Why MVC ??
+   - Well organized
+   - Rapid Application Development
+   - Reusing code
+   - Parallel development
+* How MVC works- 
+   Steps-
+    + User interacts with a view
+    + View alerts controller of a particular event 
+    + Controller updates the model
+    + Model alerts that it has changed
 
 * How to implement ??
 ** Source Code
@@ -175,7 +185,6 @@ app.controller("edit-user", function($scope,   $http,  $routeParams,  $route,$wi
             });
 
             };
-
     
 });
 

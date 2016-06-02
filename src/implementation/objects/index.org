@@ -479,8 +479,7 @@ class Session():
      + system_active
         A boolean variable which is assigned true when the system is active
         and false when the system is not active.
-
-
+        
 *** Definition
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
 class WebSystem():
@@ -524,6 +523,7 @@ class WebSystem(TestCase):
 *** Functions
 
 **** admin_check
+      A method to check if a given user is an admin, returns true if and admin else false.
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def admin_check(self,user):
         for us in self.users:
@@ -535,6 +535,8 @@ class WebSystem(TestCase):
 
 
 **** login
+      It is a method for a given user to obtain a session.
+      
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
 
     def login(self,user):
@@ -575,6 +577,7 @@ class WebSystem(TestCase):
 
 
 **** logout
+      A method to remove the user from session
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def logout(self,session):
         if isinstance(session,Session):
@@ -603,7 +606,9 @@ class WebSystem(TestCase):
                
 #+END_SRC
 
+
 **** create_user
+      A method to add a user.
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def create_user(self,session,name,email,role):
         if session.usr.role == Role.admin:
@@ -638,7 +643,11 @@ class WebSystem(TestCase):
         
 #+END_SRC
 
+
 **** delete_user
+      A method to delete a user. 
+      + only an admin can delete users who are not in session.
+
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def delete_user(self,session,user):
         if session.usr.role == Role.admin:
@@ -682,7 +691,11 @@ class WebSystem(TestCase):
         
 #+END_SRC
 
+
 **** update_role
+      A method to update the role of the given user.
+      + If role of given user is 'user' it gets upgraded to admin.
+      + If role of given user is 'admin' it gets downgraded to user.  
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
 
     def update_role(self,session,user):
@@ -769,7 +782,12 @@ class WebSystem(TestCase):
         
 #+END_SRC
 
+
 **** update_email
+      A method to update email of a user.
+      + An admin can update email of any user and his own.
+      + A user also has the privilege to update their own email
+      + A email will be updated only if it's unique.
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def update_email(self,session,user,email):
             if session.usr.role == Role.admin :
@@ -807,7 +825,10 @@ class WebSystem(TestCase):
 
 #+END_SRC
 
+
 **** search_users
+      Returns a list of users either with same email,name or role.
+ 
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def search_users(self,session,**kwargs):
         if session in self.sessions:
@@ -866,7 +887,10 @@ class WebSystem(TestCase):
         
 
 #+END_SRC
+
+
 **** show_users
+      Returns the list of registered users.
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def show_users(self):
         return self.users
@@ -887,7 +911,9 @@ class WebSystem(TestCase):
 
 #+END_SRC
 
+
 **** get_sessions
+      Returns the session list of the system.
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def get_sessions(self):
         return self.sessions
@@ -912,6 +938,7 @@ class WebSystem(TestCase):
 
 #+END_SRC
         
+
 **** get_user_from_email
 #+BEGIN_SRC python :tangle ../../src/obj.py :eval no
     def get_user_from_email(self,email):

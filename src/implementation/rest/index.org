@@ -7,6 +7,60 @@
 #+options: ^:nil
 #+LATEX: Literal LaTeX code for export
 
+* Mapping 
+** Get methods  
+    
+    |-------------+-----------------|
+    | URL         | Method          |
+    |-------------+-----------------|
+    | /users      | get_users       |
+    |-------------+-----------------|
+    | /roles      | get_roles       |
+    |-------------+-----------------|
+    | /names      | get_names       |
+    |-------------+-----------------|
+    | /emails     | get_emails      |
+    |-------------+-----------------|
+    | /user/<id>  | get_user_by_id  |
+    |-------------+-----------------|
+    | /role/<id>  | get_role_by_id  |
+    |-------------+-----------------|
+    | /email/<id> | get_email_by_id |
+    |-------------+-----------------|
+    | /name/<id>  | get_name_by_id  |
+    |             |                 |
+    |-------------+-----------------|
+       
+** Post methods
+
+    |--------------+-------------|
+    | URL          | Method      |
+    |--------------+-------------|
+    | /create_user | create_user |
+    |--------------+-------------|
+    
+** Put methods
+    |-------------------+----------------------|
+    | URL               | Method               |
+    |-------------------+----------------------|
+    | /user_roles/<id>  | update_role(int id)  |
+    |-------------------+----------------------|
+    | /user_names/<id>  | update_name(int id)  |
+    |-------------------+----------------------|
+    | /user_emails/<id> | update_email(int id) |
+    |                   |                      |
+    |-------------------+----------------------|
+
+** Delete methods
+    
+    |-------------+---------------------|
+    | URL         | Method              |
+    |-------------+---------------------|
+    | /users/<id> | delete_user(int id) |
+    |             |                     |
+    |-------------+---------------------|
+
+
 * REST
 ** Initialization
 #+BEGIN_SRC python :tangle ../../src/api.py :eval no
@@ -69,6 +123,7 @@ def logout_handler():
     session.pop('role_name', None)
     return redirect("/")
 #+END_SRC
+
 ** GET all users
 Usage:
    #+BEGIN_EXAMPLE
@@ -287,6 +342,7 @@ def get_email_by_id(id):
         abort(500, str(e))
 #+END_SRC
 
+
 ** Create a user
    Usage:
    #+BEGIN_EXAMPLE
@@ -324,6 +380,7 @@ def create_user():
             abort(500, str(e))
 #+END_SRC
 
+
 ** Delete a user
    Usage:
    #+BEGIN_EXAMPLE
@@ -352,6 +409,7 @@ def delete_user(id):
                                      "user record: %s" % str(e))
             abort(500, str(e))
 #+END_SRC
+
 
 ** Update the role of a user
    Usage:
@@ -445,8 +503,6 @@ def update_email(id):
             abort(500, str(e))
     
 #+END_SRC
-
-
 
 ** Update user
 Usage:
