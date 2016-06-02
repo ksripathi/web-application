@@ -42,7 +42,6 @@ setup(
 from src.app import create_app
 from src.db import *
 import src.config as config
-from src.api import global_system
 def create_admin_user():
     na = Name('shashank')
     em = Email('shashank@gmail.com')
