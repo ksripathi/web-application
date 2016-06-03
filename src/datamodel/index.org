@@ -225,7 +225,7 @@ types of actors:  =WebSystem= .
 | update_role(s:Session,u:User)                | s.user.role=admin     | u:user-set    | Succ or Fail              |
 |                                              |                       |               |                           |
 |----------------------------------------------+-----------------------+---------------+---------------------------|
-| update_name(s:Session,u:User,n:Name)         |                       |               |                           |
+| update_name(s:Session,u:User,n:Name)         |                       |               | Returns modifies user     |
 |----------------------------------------------+-----------------------+---------------+---------------------------|
 | update_email(s:Session,u:User,e:Email)       |                       |               | Returns modified user     |
 |----------------------------------------------+-----------------------+---------------+---------------------------|

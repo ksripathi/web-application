@@ -868,6 +868,8 @@ class WebSystem(TestCase):
 #+END_SRC
 
 ****  test_search_users
+
+    
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py : eval no
     def test_search_users(self):
         print 'test search users'
@@ -897,6 +899,8 @@ class WebSystem(TestCase):
 #+END_SRC
 
 ****  test_show_users
+        Tests :
+         - 3 users are registered and length of user's list is checked.
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
     def test_show_users(self):
@@ -920,6 +924,8 @@ class WebSystem(TestCase):
 #+END_SRC
 
 ****  test_get_sessions
+       Tests
+       - 3 users are logged in, and length of the session's list is checked.  
 #+BEGIN_SRC python :tangle ../../tests/test_obj.py :eval no
 
     def test_get_sessions(self):

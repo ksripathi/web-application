@@ -1087,6 +1087,9 @@ class WebSystem_test(TestCase):
 
 
 **** update_role
+      - Only an admin can update the roles.
+      - The admin can update his own role provided another admin exists.
+      - TypeError raised for an invalid user. 
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
     def update_role(self,session,user):
         if session.usr.role.value == 'admin':
@@ -1225,6 +1228,9 @@ class WebSystem_test(TestCase):
 #+END_SRC
 
 ****  test_update_email
+       Tests:
+       - NotAuthorisedError is raised when and user tries to update an email of
+         another user or an admin.
 #+BEGIN_SRC python :tangle ../../tests/test_db.py :eval no
     def test_update_email(self):
         print 'test update email'
