@@ -136,14 +136,12 @@ Usage:
 @api.route('/users', methods=['GET'])
 def get_users():
     global system
-    #print request.json
     session_email = request.headers.get('session')
     if session_email == None:
         abort(400)
     try:
         session = system.get_session_from_email(session_email)
         users = system.get_users(session)
-        print jsonify_list([i.to_client() for i in users])
         return jsonify_list([i.to_client() for i in users])
         
     except Exception, e:
@@ -359,7 +357,6 @@ def get_email_by_id(id):
 @api.route('/create_user', methods=['POST'])
 def create_user():
     global system
-    print request.json
     if not request.json or not 'name' in request.json or not 'email' in request.json or not 'role_id' in request.json or not 'session' in request.json :
         abort(400)
     else:
@@ -372,8 +369,6 @@ def create_user():
             session = system.get_session_from_email(session_email)
             system.create_user(session,name,email,role)
             return jsonify(status = 'sucess') 
-            
-            #return jsonify(id= id,status = 'sucess')
         except Exception, e:
             current_app.logger.error("Error occured while inserting"
                                      "user record: %s" % str(e))
@@ -594,20 +589,14 @@ class TestUser(TestCase):
     def test_get_all_users(self):
         print "test_get_all_users"
 
-        ###Create Users
-        payload = {'session': 'shashank@gmail.com'}
-
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json','session': 'shashank@gmail.com'}
 
         response = self.client.get("/users",
-                                      data=json.dumps(payload),
                                       headers=headers)
         self.assertEqual(response.status_code, 200)
 
     def test_get_all_roles(self):
         print "test_get_all_roles"
-
-        ###Create Users
         payload = {'session': 'shashank@gmail.com'}
 
         headers = {'content-type': 'application/json'}
@@ -619,8 +608,6 @@ class TestUser(TestCase):
 
     def test_get_all_names(self):
         print "test_get_all_names"
-
-        ###Create Users
         payload = {'session': 'shashank@gmail.com'}
 
         headers = {'content-type': 'application/json'}
@@ -632,8 +619,6 @@ class TestUser(TestCase):
     
     def test_get_all_emails(self):
         print "test_get_all_emails"
-
-        ###Create Users
         payload = {'session': 'shashank@gmail.com'}
 
         headers = {'content-type': 'application/json'}
@@ -645,20 +630,14 @@ class TestUser(TestCase):
 
     def test_get_one_user(self):
         print "test_get_one_user"
-
-        ### create a User
-        payload = {'session': 'shashank@gmail.com'}
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json','session': 'shashank@gmail.com'}
 
         response = self.client.get("/users/1",
-                                      data=json.dumps(payload),
                                       headers=headers)
         self.assertEqual(response.status_code, 200)
     
     def test_get_one_role(self):
         print "test_get_one_role"
-
-        ### create a User
         payload = {'session': 'shashank@gmail.com'}
         headers = {'content-type': 'application/json'}
 
@@ -669,8 +648,6 @@ class TestUser(TestCase):
     
     def test_get_one_name(self):
         print "test_get_one_name"
-
-        ### create a User
         payload = {'session': 'shashank@gmail.com'}
         headers = {'content-type': 'application/json'}
 
@@ -681,8 +658,6 @@ class TestUser(TestCase):
 
     def test_get_one_email(self):
         print "test_get_one_email"
-
-        ### create a User
         payload = {'session': 'shashank@gmail.com'}
         headers = {'content-type': 'application/json'}
 
@@ -693,8 +668,6 @@ class TestUser(TestCase):
 
     def test_create_user(self):
         print "test_create_user"
-
-        ### create a User
         payload = {'session': 'shashank@gmail.com','name':'messi','email':'messi@barca.com',
                    'role_id':'2','session':'shashank@gmail.com'}
         headers = {'content-type': 'application/json'}
@@ -707,21 +680,17 @@ class TestUser(TestCase):
     def test_delete_user(self):
         global system
         print "test_delete_user"
-
         ### create a User
         sess = system.get_session_from_email('shashank@gmail.com')
         system.create_user(sess,'messi','messi@barca.com',Role.get_by_id(2))
-        payload = {'session': 'shashank@gmail.com'}
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json','session': 'shashank@gmail.com'}
 
         response = self.client.delete("/users/2",
-                                      data=json.dumps(payload),
                                       headers=headers)
         self.assertEqual(response.status_code, 200)
         
     def test_update_role(self):
        print "test_update_role"
-
        ### create a User
        sess = system.get_session_from_email('shashank@gmail.com')
        system.create_user(sess,'messi','messi@barca.com',Role.get_by_id(2))
@@ -734,8 +703,6 @@ class TestUser(TestCase):
         
     def test_update_name(self):
         print "test_update_name"
-
-        ### create a User
         payload = {'session': 'shashank@gmail.com','name':'shashankviswanadha'}
         headers = {'content-type': 'application/json'}
         response = self.client.put("/users_names/1",
@@ -745,8 +712,6 @@ class TestUser(TestCase):
 
     def test_update_email(self):
         print "test_update_email"
-
-        ### create a User
         payload = {'session': 'shashank@gmail.com','email':'shashankviswanadha@gmail.com'}
         headers = {'content-type': 'application/json'}
         response = self.client.put("/users_emails/1",
