@@ -839,6 +839,11 @@ class Session():
             raise TypeError('Invalid User type')
 #+END_SRC
 
+**** toClient
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+    def to_client(self):
+        return self.to_client(self.usr)
+#+END_SRC
 ** WebSystem
 
 *** Introduction
@@ -926,10 +931,16 @@ class WebSystem_test(TestCase):
             if flag == 0:
                 sess = Session (user)
                 self.sessions.append(sess)
+                au = Audit(session = json.dumps(sess.to_client()),entity = 'System',time = datetime.now(),operation = 'create session',status = 'Sucess')
+                au.save()
                 return sess 
             else:
+                au = Audit(session = 'Session not created',entity = 'System',time = datetime.now(),operation = 'create session',status = 'Fail')
+                au.save()
                 raise ConstraintError("User already in session")
         else:
+            au = Audit(session = 'Session not created',entity = 'System',time = datetime.now(),operation = 'create session',status = 'Fail')
+            au.save()
             raise TypeError('Invalid user')
 
 #+END_SRC
@@ -962,7 +973,11 @@ class WebSystem_test(TestCase):
         if isinstance(session,Session):
             session.set_user(None)
             self.sessions.remove(session)
+            au = Audit(session = json.dumps(session.to_client()),entity = 'System',time = datetime.now(),operation = 'delete session',status = 'Sucess')
+            au.save()
         else:
+            au = Audit(session = json.dumps(session.to_client()),entity = 'System',time = datetime.now(),operation = 'delete session',status = 'Fail')
+            au.save()
             raise TypeError('Invalid Session type')
 #+END_SRC
 
@@ -1003,8 +1018,12 @@ class WebSystem_test(TestCase):
             newUser = User(na,em,role)
 	    newUser.save()
 	    self.users = User.get_all()
+            au = Audit(session = json.dumps(session.to_client()),entity = 'User',time = datetime.now(),operation = 'create user',status = 'Sucess')
+            au.save()
             return True
         else:
+            au = Audit(session = json.dumps(session.to_client()),entity = 'User',time = datetime.now(),operation = 'create user',status = 'Fail')
+            au.save()
             raise NotAuthorizedError('Only an admin can create a new user')
 #+END_SRC
 
@@ -1040,6 +1059,8 @@ class WebSystem_test(TestCase):
             if isinstance (user,User) and user in self.users:
                 for sess in self.sessions:
                     if sess.usr.email.value == user.email.value:
+                        au = Audit(session = json.dumps(session.to_client()),entity = 'User',time = datetime.now(),operation = 'delete user',status = 'Fail')
+                        au.save()
                         raise NotAuthorizedError('user in session') 
 		na = user.name
 		em = user.email            
@@ -1049,10 +1070,16 @@ class WebSystem_test(TestCase):
 		if del_name == []:
 		    del_name.delete()
 		self.users = User.get_all()
+                au = Audit(session = json.dumps(session.to_client()),entity = 'User',time = datetime.now(),operation = 'delete user',status = 'Sucess')
+                au.save()
                 return True
             else:
+                au = Audit(session = json.dumps(session.to_client()),entity = 'User',time = datetime.now(),operation = 'delete user',status = 'Fail')
+                au.save()
                 raise TypeError('Invalid user')
         else:
+            au = Audit(session = json.dumps(session.to_client()),entity = 'User',time = datetime.now(),operation = 'delete user',status = 'Fail')
+            au.save()
             raise NotAuthorizedError('You do not have he permission to delete users' )
 #+END_SRC
 
@@ -1098,19 +1125,29 @@ class WebSystem_test(TestCase):
                     user.set_role(Role.get_by_id(1))
                     user.save()
                     self.users = User.get_all()
+                    au = Audit(session = json.dumps(session.to_client()),entity = 'Role',time = datetime.now(),operation = 'update role',status = 'Sucess',old_data = 'user')
+                    au.save()
                     return user
                 elif user.role.value == 'admin': 
                     if user.email.value == session.usr.email.value and self.admin_check(user) == True:
                         user.set_role(Role.get_by_id(2))
                         user.save()
                         self.users = User.get_all()
+                        au = Audit(session = json.dumps(session.to_client()),entity = 'Role',time = datetime.now(),operation = 'update role',status = 'Sucess',old_data = 'admin')
+                        au.save()
                         return user
                     else:
+                        au = Audit(session = json.dumps(session.to_client()),entity = 'Role',time = datetime.now(),operation = 'update role',status = 'Fail')
+                        au.save()
                         raise NotAuthorizedError('Operation not authorized')
                 
             else:
+                au = Audit(session = json.dumps(session.to_client()),entity = 'Role',time = datetime.now(),operation = 'update role',status = 'Fail')
+                au.save()
                 raise TypeError('Invalid User type')
         else:
+            au = Audit(session = json.dumps(session.to_client()),entity = 'Role',time = datetime.now(),operation = 'update role',status = 'Fail')
+            au.save()
             raise  NotAuthorizedError('Operation not authorized')
 
 #+END_SRC
@@ -1147,6 +1184,7 @@ class WebSystem_test(TestCase):
         if session.usr.role.value == 'admin' :
             if isinstance (user,User) and user in self.users :
                 old_name = user.name
+                old_name_str = old_name.value
                 na = Name(name)
                 na.save()
                 user.set_name(na)
@@ -1154,22 +1192,31 @@ class WebSystem_test(TestCase):
                 if old_name.users == []:
                     old_name.delete()
                 self.users = User.get_all()
+                au = Audit(session = json.dumps(session.to_client()),entity = 'Name',time = datetime.now(),operation = 'update name',status = 'Sucess',old_data = old_name_str)
+                au.save()
                 return user
             else:
                 raise TypeError('Invalid Email Type')
         elif session.usr.role.value == 'user' :
             if isinstance (user,User) and user in self.users and user.name.value == session.usr.name.value:
                 old_name = user.name
+                old_name_str = old_name.value
                 na = Name(name)
                 na.save()
                 user.set_name(na)
                 if old_name.users == []:
                    old_name.delete()
                 self.users = User.get_all()
+                au = Audit(session = json.dumps(session.to_client()),entity = 'Name',time = datetime.now(),operation = 'update name',status = 'Sucess',old_data = old_name_str)
+                au.save()
                 return user
             else:
+                au = Audit(session = json.dumps(session.to_client()),entity = 'Name',time = datetime.now(),operation = 'update name',status = 'Fail')
+                au.save()
                 raise NotAuthorizedError('Only an admin can change the names of other users')
         else:
+            au = Audit(session = json.dumps(session.to_client()),entity = 'Name',time = datetime.now(),operation = 'update name',status = 'Fail')
+            au.save()
             raise TypeError('Invalid role type')
 #+END_SRC
 
@@ -1204,10 +1251,13 @@ class WebSystem_test(TestCase):
                     em = Email(email)
                     em.save()
                     old_email = user.email
+                    old_email_str = old_email.value
                     user.set_email(em)
                     user.save()
                     old_email.delete()
                     self.users = User.get_all()
+                    au = Audit(session = json.dumps(session.to_client()),entity = 'Email',time = datetime.now(),operation = 'update email',status = 'Sucess',old_data = old_email_str)
+                    au.save()
                     return user
                 else:
                     raise TypeError('Invalid User type')          
@@ -1216,14 +1266,21 @@ class WebSystem_test(TestCase):
                     em = Email(email)
                     em.save()
                     old_email = user.email
+                    old_email_str = old_email.value
                     user.set_email(em)
                     user.save()
                     old_email.delete()
                     self.users = User.get_all()
+                    au = Audit(session = json.dumps(session.to_client()),entity = 'Email',time = datetime.now(),operation = 'update email',status = 'Sucess',old_data = old_email_str)
+                    au.save()
                     return user
                 else:
+                    au = Audit(session = json.dumps(session.to_client()),entity = 'Email',time = datetime.now(),operation = 'update email',status = 'Fail')
+                    au.save()
                     raise NotAuthorizedError('Only an admin can change the names of other users')
             else:
+                au = Audit(session = json.dumps(session.to_client()),entity = 'Email',time = datetime.now(),operation = 'update email',status = 'Fail')
+                au.save()
                 raise TypeError('Invalid role type')
 #+END_SRC
 
@@ -1521,6 +1578,44 @@ class WebSystem_test(TestCase):
         raise TypeError('Invalid session')
 #+END_SRC
 
+
+** Audit
+*** Introduction
+   This class registers(logs) all the operations performed on the system.
+*** Definition
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+class Audit(Entity):
+    id = db.Column(db.Integer,primary_key = True)
+    session = db.Column(db.String(128),nullable = False)
+    entity = db.Column(db.String(50),nullable = False)
+    time = db.Column(db.String(100))
+    old_data = db.Column(db.String(300))
+    operation = db.Column(db.String(128),nullable = False)
+    status = db.Column(db.String(10))
+#+END_SRC
+*** Constructor
+#+BEGIN_SRC python :tangle ../../src/db.py :eval no
+
+    def __init__(self,**kwargs):
+        if 'session' not in kwargs:
+            raise AttributeRequired('session in mandatory')
+        if 'entity' not in kwargs:
+            raise AttributeRequired('entity in mandatory')
+        if 'time' not in kwargs:
+            raise AttributeRequired('time in mandatory')
+        if 'operation' not in kwargs:
+            raise AttributeRequired('operation in mandatory')
+        if 'status' not in kwargs:
+            raise AttributeRequired('status in mandatory')
+        
+        self.session = kwargs['session']
+        self.entity = kwargs['entity']
+        self.time =  kwargs['time']
+        self.operation = kwargs['operation']
+        self.status = kwargs['status']
+        if 'old_data' in kwargs:
+            self.old_data = kwargs['old_data']
+#+END_SRC
 **  setUp and tearDown
 
 #+BEGIN_SRC python :tangle ../../src/db.py :eval no
